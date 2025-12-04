@@ -17,6 +17,7 @@
             --accent-green: #4ade80;
             --accent-red: #f87171;
             --accent-purple: #c084fc;
+            --accent-yellow: #facc15;
             --border-color: #334155;
         }
 
@@ -95,9 +96,13 @@
             color: var(--text-primary);
         }
 
-        p {
+        p, li {
             color: var(--text-secondary);
-            margin-bottom: 1rem;
+            margin-bottom: 0.8rem;
+        }
+
+        ul {
+            list-style-type: none;
         }
 
         /* --- Cards Grid --- */
@@ -107,9 +112,15 @@
             gap: 2rem;
         }
 
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
         .grid-4 {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 1.5rem;
         }
 
@@ -119,6 +130,7 @@
             border-radius: 12px;
             border: 1px solid var(--border-color);
             transition: transform 0.2s, border-color 0.2s;
+            height: 100%;
         }
 
         .card:hover {
@@ -136,28 +148,32 @@
             display: inline-block;
             padding: 4px 10px;
             border-radius: 20px;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             font-weight: 600;
             margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
         
         .tag-blue { background: rgba(56, 189, 248, 0.2); color: var(--accent-blue); }
         .tag-green { background: rgba(74, 222, 128, 0.2); color: var(--accent-green); }
         .tag-red { background: rgba(248, 113, 113, 0.2); color: var(--accent-red); }
+        .tag-purple { background: rgba(192, 132, 252, 0.2); color: var(--accent-purple); }
 
         .workflow {
             font-family: 'JetBrains Mono', monospace;
             background: #000;
-            padding: 1rem;
+            padding: 1.2rem;
             border-radius: 8px;
             color: var(--accent-green);
             text-align: center;
-            margin: 1rem 0;
+            margin: 1.5rem 0;
             border: 1px solid #333;
+            font-size: 0.9rem;
         }
 
         .price-box {
-            background: rgba(192, 132, 252, 0.1);
+            background: rgba(192, 132, 252, 0.05);
             border: 1px solid var(--accent-purple);
             padding: 1.5rem;
             border-radius: 8px;
@@ -170,20 +186,32 @@
             margin-bottom: 0.5rem;
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.9rem;
+            color: var(--text-primary);
+        }
+
+        .alert-box {
+            margin-top: 1.5rem;
+            border: 1px solid var(--accent-red);
+            background: rgba(248, 113, 113, 0.05);
+            padding: 1rem;
+            border-radius: 8px;
+            color: var(--accent-red);
+            font-size: 0.9rem;
         }
 
         /* --- Footer --- */
         footer {
             text-align: center;
-            padding: 2rem;
+            padding: 3rem 0;
             color: var(--text-secondary);
             font-size: 0.9rem;
+            border-top: 1px solid var(--border-color);
         }
 
         /* --- Responsive --- */
         @media (max-width: 768px) {
             h2 { font-size: 1.5rem; }
-            .nav-links { display: none; } /* Simplification pour mobile */
+            .nav-links { display: none; }
         }
     </style>
 </head>
@@ -192,13 +220,14 @@
     <header>
         <div class="container">
             <nav>
-                <div class="logo"><i class="fa-solid fa-shield-halved"></i> CyberSec_Notes</div>
+                <div class="logo"><i class="fa-solid fa-shield-halved"></i> CyberNotes_</div>
                 <div class="nav-links">
-                    <a href="#cert-csirt">CSIRT/CERT</a>
-                    <a href="#elk">ELK Stack</a>
+                    <a href="#cert-csirt">CERT/CSIRT</a>
+                    <a href="#elk">ELK</a>
                     <a href="#soar">SOAR</a>
                     <a href="#voc">VOC</a>
                     <a href="#ids-ips">IDS/IPS</a>
+                    <a href="#definitions">Définitions</a>
                 </div>
             </nav>
         </div>
@@ -207,87 +236,112 @@
     <main class="container">
 
         <section id="cert-csirt">
-            <h2><i class="fa-solid fa-building-shield"></i> CSIRT & CERT</h2>
-            <p>Deux entités complémentaires pour la gestion des risques et des incidents.</p>
-            
+            <h2><i class="fa-solid fa-building-shield"></i> Organismes : CSIRT & CERT</h2>
             <div class="grid-2">
                 <div class="card" style="border-top: 4px solid var(--accent-green);">
-                    <div class="card-icon" style="color: var(--accent-green);"><i class="fa-solid fa-bell"></i></div>
+                    <div class="card-icon" style="color: var(--accent-green);"><i class="fa-solid fa-bullhorn"></i></div>
                     <h3>CERT</h3>
-                    <span class="tag tag-green">Prévention</span>
-                    <p><strong>Computer Emergency Response Team</strong></p>
-                    <p>Focalisé sur la sensibilisation, la veille technologique et le traitement des alertes de sécurité.</p>
-                    <hr style="border-color: #333; margin: 10px 0;">
-                    <small>Ex: CERT-FR (Gouvernemental) pour Organismes Publics, OIV, OSE.</small>
+                    <span class="tag tag-green">Alerte & Sensibilisation</span>
+                    <p>Focalisé sur la veille, le traitement des alertes de sécurité et la centralisation.</p>
+                    
+                    <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; margin-top: 15px;">
+                        <strong style="color: var(--text-primary);">CERT-FR (Gouvernemental)</strong>
+                        <ul style="margin-top: 5px; font-size: 0.85rem;">
+                            <li><i class="fa-solid fa-check" style="color: var(--accent-green)"></i> Organismes Publics / Ministères</li>
+                            <li><i class="fa-solid fa-check" style="color: var(--accent-green)"></i> OIV (Opérateurs d'Importance Vitale)</li>
+                            <li><i class="fa-solid fa-check" style="color: var(--accent-green)"></i> OSE (Opérateurs de Services Essentiels)</li>
+                        </ul>
+                    </div>
                 </div>
 
-                <div class="card" style="border-top: 4px solid var(--accent-red);">
-                    <div class="card-icon" style="color: var(--accent-red);"><i class="fa-solid fa-truck-medical"></i></div>
+                <div class="card" style="border-top: 4px solid var(--accent-blue);">
+                    <div class="card-icon" style="color: var(--accent-blue);"><i class="fa-solid fa-truck-medical"></i></div>
                     <h3>CSIRT</h3>
-                    <span class="tag tag-red">Réponse</span>
-                    <p><strong>Computer Security Incident Response Team</strong></p>
-                    <p>Fournit une aide opérationnelle active lors de la réponse à incident.</p>
-                    <hr style="border-color: #333; margin: 10px 0;">
-                    <small>Ex: 14 CSIRT Territoriaux (Régions) pour PME et collectivités.</small>
+                    <span class="tag tag-blue">Réponse à incident</span>
+                    <p>Aide opérationnelle ("Pompiers") pour la réponse, le confinement et la remédiation.</p>
+                    
+                    <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; margin-top: 15px;">
+                        <strong style="color: var(--text-primary);">CSIRT Territoriaux (Régionaux)</strong>
+                        <ul style="margin-top: 5px; font-size: 0.85rem;">
+                            <li><i class="fa-solid fa-map-location-dot" style="color: var(--accent-blue)"></i> <strong>14 centres</strong> (1 par région)</li>
+                            <li><i class="fa-solid fa-users" style="color: var(--accent-blue)"></i> Cible : PME, ETI, Collectivités</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
             
-            <div style="margin-top: 2rem; background: rgba(56, 189, 248, 0.1); padding: 1rem; border-radius: 8px;">
-                <strong><i class="fa-solid fa-bullseye"></i> Intérêts pour le SOC :</strong> Suivi des incidents, mise en relation avec experts, anticipation des menaces.
+            <div style="margin-top: 2rem; background: rgba(56, 189, 248, 0.1); padding: 1rem; border-radius: 8px; border-left: 4px solid var(--accent-blue);">
+                <strong><i class="fa-solid fa-link"></i> Intérêts pour le SOC :</strong>
+                <span style="color: var(--text-secondary); display: block; margin-top: 5px;">
+                    1. Suivi des incidents & réception de CTI (IoC).<br>
+                    2. Mise en relation avec des experts cyber.<br>
+                    3. Prévention et anticipation des menaces.
+                </span>
             </div>
         </section>
 
         <section id="elk">
-            <h2><i class="fa-solid fa-layer-group"></i> Projet ELK</h2>
-            <p>La stack Elastic permet de regrouper, traiter et stocker les logs de multiples plateformes.</p>
+            <h2><i class="fa-solid fa-layer-group"></i> Projet ELK (Elastic Stack)</h2>
+            <p>Solution (SaaS, PaaS ou On-premise) pour regrouper, traiter et stocker les logs de multiples plateformes.</p>
 
             <div class="workflow">
-                Flux Typique : Beats <i class="fa-solid fa-arrow-right"></i> Logstash <i class="fa-solid fa-arrow-right"></i> Elasticsearch <i class="fa-solid fa-arrow-right"></i> Kibana
+                <span style="color:#fff">Flux :</span> Beats <i class="fa-solid fa-arrow-right"></i> Logstash <i class="fa-solid fa-arrow-right"></i> Elasticsearch <i class="fa-solid fa-arrow-right"></i> Kibana
             </div>
 
             <div class="grid-4">
                 <div class="card">
-                    <h3 style="color:var(--accent-blue)">Beats</h3>
-                    <p style="font-size: 0.9rem;">Agents légers installés sur les machines. Collectent et envoient les données.</p>
+                    <h4 style="color:var(--accent-blue)">1. Beats</h4>
+                    <small>Collecte</small>
+                    <hr style="border-color:#333; margin:10px 0">
+                    <p style="font-size: 0.85rem;">Agents légers sur les machines (Filebeat, Metricbeat). Envoient les données.</p>
                 </div>
                 <div class="card">
-                    <h3 style="color:var(--accent-purple)">Logstash</h3>
-                    <p style="font-size: 0.9rem;">"Tuyauterie". Ingestion, transformation et parsing des logs.</p>
+                    <h4 style="color:var(--accent-purple)">2. Logstash</h4>
+                    <small>Traitement (ETL)</small>
+                    <hr style="border-color:#333; margin:10px 0">
+                    <p style="font-size: 0.85rem;">Ingestion, transformation, parsing et enrichissement des logs.</p>
                 </div>
                 <div class="card">
-                    <h3 style="color:var(--accent-green)">Elasticsearch</h3>
-                    <p style="font-size: 0.9rem;">Cœur du système. Stockage, indexation et moteur de recherche.</p>
+                    <h4 style="color:var(--accent-green)">3. Elasticsearch</h4>
+                    <small>Stockage</small>
+                    <hr style="border-color:#333; margin:10px 0">
+                    <p style="font-size: 0.85rem;">Moteur de recherche et d'analyse. Indexe les données.</p>
                 </div>
                 <div class="card">
-                    <h3 style="color:var(--accent-red)">Kibana</h3>
-                    <p style="font-size: 0.9rem;">Interface visuelle. Dashboards, graphiques et exploration.</p>
+                    <h4 style="color:var(--accent-red)">4. Kibana</h4>
+                    <small>Visualisation</small>
+                    <hr style="border-color:#333; margin:10px 0">
+                    <p style="font-size: 0.85rem;">Interface graphique. Dashboards, exploration.</p>
                 </div>
             </div>
         </section>
 
         <section id="soar">
             <h2><i class="fa-solid fa-robot"></i> SOAR</h2>
-            <p><strong>Security Orchestration, Automation and Response</strong>. Souvent vu comme un SIEM évolué.</p>
+            <span class="tag tag-purple">SIEM Évolué</span>
+            <p><strong>Security Orchestration, Automation and Response</strong>. Solution pour orchestrer les outils et automatiser.</p>
             
             <div class="grid-2">
                 <div>
-                    <h3>Principe Technique</h3>
+                    <h3><i class="fa-solid fa-gears"></i> Principe Technique</h3>
                     <ul style="padding-left: 20px; color: var(--text-secondary);">
-                        <li><strong>Collecte :</strong> Centralise les alertes (SIEM, EDR, AV).</li>
-                        <li><strong>Orchestration :</strong> Coordonne les différents outils.</li>
-                        <li><strong>Automatisation :</strong> Déclenche des actions (playbooks) sans intervention humaine.</li>
+                        <li><strong>1. Collecte & Analyse :</strong> Récupère les logs/alertes (SIEM, EDR, AV).</li>
+                        <li><strong>2. Intégration :</strong> Connecte des outils hétérogènes.</li>
+                        <li><strong>3. Orchestration :</strong> Automatise les actions via des playbooks.</li>
                     </ul>
+                    <p style="margin-top:15px; font-style: italic;">"Analyse préliminaire automatisée."</p>
                 </div>
+                
                 <div>
                     <div class="price-box">
-                        <h4 style="color: var(--accent-purple); margin-bottom: 10px;">Estimations Projet</h4>
+                        <h4 style="color: var(--accent-purple); margin-bottom: 15px;"><i class="fa-solid fa-coins"></i> Coûts Projet (Estimations)</h4>
                         <div class="price-item">
                             <span>Licence</span>
-                            <span>5k€ - 100k€</span>
+                            <span>5 000€ - 100 000€</span>
                         </div>
                         <div class="price-item">
                             <span>Infrastructure</span>
-                            <span>10k€ - 50k€</span>
+                            <span>10 000€ - 50 000€</span>
                         </div>
                     </div>
                 </div>
@@ -295,49 +349,93 @@
         </section>
 
         <section id="voc">
-            <h2><i class="fa-solid fa-bug"></i> VOC</h2>
+            <h2><i class="fa-solid fa-magnifying-glass-chart"></i> VOC</h2>
             <span class="tag tag-red">Approche Offensive</span>
-            <p><strong>Vulnerability Operation Center</strong></p>
-            <p>Contrairement au SOC (défensif), le VOC cherche activement les failles.</p>
-            <div class="grid-2">
+            <p><strong>Vulnerability Operation Center</strong>. Recherche de failles <em>avant</em> l'attaque.</p>
+            
+            <div class="grid-3">
                 <div class="card">
-                    <h3>Fonctions</h3>
-                    <p>Scans de vulnérabilités, tests sur machines et services.</p>
+                    <h3>Fonctionnement</h3>
+                    <p>Scans réguliers des machines, des services et des IPs.</p>
                 </div>
                 <div class="card">
                     <h3>Organisation</h3>
-                    <p>Peut être une équipe dédiée, une fonction métier ou une plateforme support.</p>
+                    <p>Le VOC peut être :</p>
+                    <ul style="font-size: 0.85rem; padding-left: 15px;">
+                        <li>Une équipe dédiée</li>
+                        <li>Une fonction du métier</li>
+                        <li>Une plateforme support</li>
+                    </ul>
+                </div>
+                <div class="card" style="border-color: var(--accent-red);">
+                    <h3 style="color: var(--accent-red);">Vs SOC</h3>
+                    <p><strong>SOC :</strong> Défensif (Temps réel)</p>
+                    <p><strong>VOC :</strong> Offensif (Préventif)</p>
                 </div>
             </div>
         </section>
 
         <section id="ids-ips">
             <h2><i class="fa-solid fa-network-wired"></i> IDS & IPS</h2>
-            <p>Intégration classique : Sonde <i class="fa-solid fa-arrow-right"></i> SIEM <i class="fa-solid fa-arrow-right"></i> SOC.</p>
+            <div class="workflow" style="background: var(--card-bg); text-align: left; border:none;">
+                <i class="fa-solid fa-sitemap"></i> <strong>Chaine d'intégration :</strong> Sonde (IDS/IPS) <i class="fa-solid fa-arrow-right"></i> SIEM (Corrélation) <i class="fa-solid fa-arrow-right"></i> SOC (Analyse)
+            </div>
 
             <div class="grid-2">
                 <div class="card">
                     <h3>IDS <span style="font-size:0.7em; color:var(--text-secondary)">(Detection)</span></h3>
                     <span class="tag tag-blue">Passif</span>
-                    <p>Écoute le réseau et alerte en cas d'anomalie. Ne bloque pas le flux.</p>
+                    <p>Écoute le réseau, analyse et lève une alerte. Ne modifie pas le trafic.</p>
                 </div>
                 <div class="card">
                     <h3>IPS <span style="font-size:0.7em; color:var(--text-secondary)">(Prevention)</span></h3>
                     <span class="tag tag-red">Actif</span>
                     <p>Analyse et peut <strong>bloquer</strong> les paquets malveillants.</p>
-                    <p><small>HIPS : Version installée sur l'hôte (Endpoint).</small></p>
+                    <hr style="border-color:#333; margin:10px 0">
+                    <p><small><strong>HIPS :</strong> IPS au niveau de l'hôte (Endpoint) ou sur éléments réseaux (FW/WAF).</small></p>
                 </div>
             </div>
             
-            <div style="margin-top: 1.5rem; border: 1px solid var(--accent-red); padding: 1rem; border-radius: 8px; color: var(--accent-red);">
-                <i class="fa-solid fa-triangle-exclamation"></i> <strong>Point Négatif :</strong> Les Faux Négatifs (absence de détection). Nécessite une mise à jour constante des bases de données de signatures.
+            <div class="alert-box">
+                <i class="fa-solid fa-triangle-exclamation"></i> <strong>Point Négatif Majeur : Les Faux Négatifs</strong><br>
+                Risque de non-détection d'une menace réelle.
+                <br><em>Solution :</em> Mettre à jour très régulièrement la base de données de signatures.
+            </div>
+        </section>
+
+        <section id="definitions">
+            <h2><i class="fa-solid fa-book"></i> Définitions & Concepts</h2>
+            
+            <div class="grid-2">
+                <div class="card" style="background: linear-gradient(145deg, #1e293b, #243045);">
+                    <h3 style="color: var(--accent-yellow);">MDR</h3>
+                    <p><strong>Managed Detection and Response</strong></p>
+                    <p>C'est un EDR géré par une entreprise externe. Externalisation de la surveillance et de la réponse.</p>
+                </div>
+
+                <div class="card">
+                    <h3 style="color: var(--accent-purple);">Évolution SIEM</h3>
+                    <ul style="margin-top:10px;">
+                        <li style="margin-bottom: 10px;">
+                            <strong style="color: var(--text-primary);">SIM :</strong> Security Information Management.<br>
+                            <small>Gestion, stockage et conformité (Long terme).</small>
+                        </li>
+                        <li style="margin-bottom: 10px;">
+                            <strong style="color: var(--text-primary);">SEM :</strong> Security Event Management.<br>
+                            <small>Gestion des événements en temps réel (Monitoring).</small>
+                        </li>
+                        <li>
+                            <strong style="color: var(--accent-purple);">SIEM :</strong> Fusion des deux (SIM + SEM).
+                        </li>
+                    </ul>
+                </div>
             </div>
         </section>
 
     </main>
 
     <footer>
-        <p>&copy; 2023 - Projet SOC/CSIRT - Notes de cours</p>
+        <p>&copy; 2023 - CyberSec Notes - Synthèse de cours</p>
     </footer>
 
 </body>
