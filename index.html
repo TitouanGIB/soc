@@ -3,440 +3,621 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CyberSec - Architecture & Défense</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <meta name="description" content="Manuel complet d'Architecture de Cyberdéfense : SIEM, Splunk, ELK, SOAR, CSIRT, CTI, MSSP.">
+    <title>CyberDefense - Architecture & Blue Team MasterClass</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
         :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
-            --accent-blue: #38bdf8;
-            --accent-green: #4ade80;
-            --accent-red: #f87171;
-            --accent-purple: #c084fc;
-            --accent-yellow: #facc15;
+            /* Palette Dark Mode "Pro" */
+            --bg-body: #0b1120;       
+            --bg-card: #1e293b;       
+            --bg-sidebar: #0f172a;    
             --border-color: #334155;
+            
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            
+            /* Accents */
+            --splunk-green: #65a637;  
+            --elastic-yellow: #f0c618; 
+            --blue-accent: #38bdf8;
+            --purple-accent: #c084fc;
+            --red-accent: #f87171;
+            --orange-accent: #fb923c;
+            --cyan-accent: #22d3ee;
+            
+            --code-bg: #0d1117;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-primary);
-            line-height: 1.6;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            line-height: 1.7;
+            display: flex;
         }
 
-        /* --- Header --- */
-        header {
-            background: rgba(15, 23, 42, 0.95);
-            border-bottom: 1px solid var(--border-color);
-            padding: 1.5rem 0;
+        /* --- Sidebar Navigation (Desktop) --- */
+        .sidebar {
+            width: 280px;
+            background-color: var(--bg-sidebar);
+            height: 100vh;
             position: sticky;
             top: 0;
-            z-index: 100;
-            backdrop-filter: blur(10px);
-        }
-
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-
-        nav {
+            border-right: 1px solid var(--border-color);
+            padding: 2rem 1.5rem;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            flex-direction: column;
+            overflow-y: auto;
+            z-index: 100;
         }
 
-        .logo {
-            font-weight: 700;
-            font-size: 1.5rem;
-            color: var(--accent-blue);
+        .brand {
             font-family: 'JetBrains Mono', monospace;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--blue-accent);
+            margin-bottom: 2.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
+        .nav-links { list-style: none; }
+        .nav-links li { margin-bottom: 0.5rem; }
+        
         .nav-links a {
-            color: var(--text-secondary);
             text-decoration: none;
-            margin-left: 20px;
+            color: var(--text-muted);
             font-size: 0.9rem;
-            transition: color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: all 0.2s;
         }
 
-        .nav-links a:hover {
-            color: var(--accent-blue);
+        .nav-links a:hover, .nav-links a.active {
+            background: rgba(56, 189, 248, 0.1);
+            color: var(--blue-accent);
         }
 
-        /* --- Sections --- */
-        section {
-            padding: 4rem 0;
+        .nav-links a i { width: 20px; text-align: center; font-size: 0.9em; }
+        
+        .nav-category {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #64748b;
+            margin: 1.5rem 0 0.5rem 0;
+            font-weight: 700;
+        }
+
+        /* --- Main Content --- */
+        .main-content {
+            flex: 1;
+            padding: 3rem 4rem;
+            max-width: 1600px;
+            overflow-x: hidden; /* Empêche le débordement horizontal global */
+        }
+
+        /* --- Typography --- */
+        h1 { font-size: 2.5rem; margin-bottom: 1rem; color: #fff; }
+        h2 { 
+            font-size: 2rem; 
+            margin-top: 5rem; 
+            margin-bottom: 1.5rem; 
+            padding-bottom: 0.5rem; 
             border-bottom: 1px solid var(--border-color);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 15px;
         }
+        h3 { font-size: 1.4rem; margin-top: 2rem; margin-bottom: 1rem; color: var(--text-main); }
+        p { margin-bottom: 1.2rem; color: var(--text-muted); }
+        
+        strong { color: #fff; font-weight: 600; }
+        em { color: var(--blue-accent); font-style: normal; }
 
-        h2 {
-            font-size: 2rem;
-            margin-bottom: 2rem;
-            color: var(--text-primary);
-            border-left: 4px solid var(--accent-blue);
-            padding-left: 15px;
-        }
-
-        h3 {
-            font-size: 1.3rem;
-            margin-bottom: 1rem;
-            color: var(--text-primary);
-        }
-
-        p, li {
-            color: var(--text-secondary);
-            margin-bottom: 0.8rem;
-        }
-
-        ul {
-            list-style-type: none;
-        }
-
-        /* --- Cards Grid --- */
-        .grid-2 {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-        }
-
-        .grid-3 {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .grid-4 {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-        }
+        /* --- Cards & Containers --- */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+        .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; }
 
         .card {
-            background-color: var(--card-bg);
-            padding: 2rem;
-            border-radius: 12px;
+            background: var(--bg-card);
             border: 1px solid var(--border-color);
-            transition: transform 0.2s, border-color 0.2s;
+            padding: 1.5rem;
+            border-radius: 12px;
+            transition: transform 0.2s;
             height: 100%;
+            display: flex;
+            flex-direction: column;
+            /* Empêche le texte de sortir de la carte */
+            word-wrap: break-word; 
+            overflow: hidden;
         }
+        .card:hover { border-color: var(--blue-accent); transform: translateY(-3px); }
 
-        .card:hover {
-            transform: translateY(-5px);
-            border-color: var(--accent-blue);
-        }
-
-        .card-icon {
-            font-size: 2rem;
-            margin-bottom: 1rem;
-        }
-
-        /* --- Specific Styling --- */
-        .tag {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-        
-        .tag-blue { background: rgba(56, 189, 248, 0.2); color: var(--accent-blue); }
-        .tag-green { background: rgba(74, 222, 128, 0.2); color: var(--accent-green); }
-        .tag-red { background: rgba(248, 113, 113, 0.2); color: var(--accent-red); }
-        .tag-purple { background: rgba(192, 132, 252, 0.2); color: var(--accent-purple); }
-
-        .workflow {
-            font-family: 'JetBrains Mono', monospace;
-            background: #000;
-            padding: 1.2rem;
-            border-radius: 8px;
-            color: var(--accent-green);
-            text-align: center;
+        .tech-box {
+            background: rgba(255,255,255,0.03);
+            border-left: 4px solid var(--blue-accent);
+            padding: 1.5rem;
             margin: 1.5rem 0;
-            border: 1px solid #333;
-            font-size: 0.9rem;
+            border-radius: 0 8px 8px 0;
+            word-wrap: break-word;
         }
 
-        .price-box {
-            background: rgba(192, 132, 252, 0.05);
-            border: 1px solid var(--accent-purple);
+        /* --- Specific Tech Styling --- */
+        .splunk-box { border-color: var(--splunk-green); background: rgba(101, 166, 55, 0.05); }
+        .elastic-box { border-color: var(--elastic-yellow); background: rgba(240, 198, 24, 0.05); }
+        .cti-box { border-color: var(--orange-accent); background: rgba(251, 146, 60, 0.05); }
+
+        /* --- Code Blocks --- */
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            background: rgba(255,255,255,0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: var(--blue-accent);
+        }
+
+        pre {
+            background: var(--code-bg);
             padding: 1.5rem;
             border-radius: 8px;
-            margin-top: 1rem;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            border: 1px solid var(--border-color);
         }
 
-        .price-item {
+        pre code {
+            background: none;
+            padding: 0;
+            color: #e2e8f0;
+            display: block;
+        }
+
+        /* --- Diagram Elements --- */
+        .flowchart {
             display: flex;
-            justify-content: space-between;
-            margin-bottom: 0.5rem;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.9rem;
-            color: var(--text-primary);
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin: 2rem 0;
+            padding: 2rem;
+            background: #000;
+            border-radius: 12px;
         }
-
-        .alert-box {
-            margin-top: 1.5rem;
-            border: 1px solid var(--accent-red);
-            background: rgba(248, 113, 113, 0.05);
-            padding: 1rem;
+        .step {
+            background: var(--bg-card);
+            padding: 1rem 1.5rem;
+            border: 1px solid var(--border-color);
             border-radius: 8px;
-            color: var(--accent-red);
+            text-align: center;
+            font-weight: bold;
             font-size: 0.9rem;
+            position: relative;
+        }
+        .arrow { color: var(--text-muted); font-size: 1.2rem; }
+
+        /* --- Pyramid of Pain Visualization --- */
+        .pyramid-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 2rem 0;
+            width: 100%;
+        }
+        .pyramid-level {
+            width: 100%;
+            text-align: center;
+            padding: 8px;
+            margin-bottom: 4px;
+            border-radius: 4px;
+            color: #000;
+            font-weight: 700;
+            font-size: 0.9rem;
+            font-family: 'JetBrains Mono', monospace;
         }
 
+        /* --- Badges --- */
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-right: 8px;
+        }
+        .badge-blue { background: rgba(56, 189, 248, 0.2); color: var(--blue-accent); }
+        .badge-green { background: rgba(101, 166, 55, 0.2); color: var(--splunk-green); }
+        .badge-purple { background: rgba(192, 132, 252, 0.2); color: var(--purple-accent); }
+        .badge-orange { background: rgba(251, 146, 60, 0.2); color: var(--orange-accent); }
+        .badge-cyan { background: rgba(34, 211, 238, 0.2); color: var(--cyan-accent); }
+
+        /* --- Tables --- */
+        table { width: 100%; border-collapse: collapse; margin-bottom: 2rem; color: var(--text-muted); }
+        th { text-align: left; padding: 15px; color: #fff; border-bottom: 2px solid var(--border-color); }
+        td { padding: 15px; border-bottom: 1px solid var(--border-color); font-size: 0.95rem; }
+        
         /* --- Footer --- */
         footer {
-            text-align: center;
-            padding: 3rem 0;
-            color: var(--text-secondary);
-            font-size: 0.9rem;
+            margin-top: 5rem;
+            padding-top: 2rem;
             border-top: 1px solid var(--border-color);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
         }
 
         /* --- Responsive --- */
-        @media (max-width: 768px) {
-            h2 { font-size: 1.5rem; }
-            .nav-links { display: none; }
+        @media (max-width: 1024px) {
+            body { flex-direction: column; }
+            .sidebar { width: 100%; height: auto; position: relative; padding: 1rem; }
+            .main-content { padding: 2rem 1.5rem; }
+            .nav-links { display: flex; flex-wrap: wrap; gap: 10px; }
+            .nav-category { width: 100%; margin-top: 10px; }
+            .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="container">
-            <nav>
-                <div class="logo"><i class="fa-solid fa-shield-halved"></i> CyberNotes_</div>
-                <div class="nav-links">
-                    <a href="#cert-csirt">CERT/CSIRT</a>
-                    <a href="#elk">ELK</a>
-                    <a href="#soar">SOAR</a>
-                    <a href="#voc">VOC</a>
-                    <a href="#ids-ips">IDS/IPS</a>
-                    <a href="#definitions">Définitions</a>
-                </div>
-            </nav>
+    <nav class="sidebar">
+        <div class="brand">
+            <i class="fa-solid fa-shield-virus"></i> BLUE TEAM_OPS
         </div>
-    </header>
+        
+        <div class="nav-category">Organisation</div>
+        <ul class="nav-links">
+            <li><a href="#intro"><i class="fa-solid fa-home"></i> Accueil</a></li>
+            <li><a href="#cert-csirt"><i class="fa-solid fa-users-gear"></i> CSIRT & CERT</a></li>
+            <li><a href="#managed-soc"><i class="fa-solid fa-handshake"></i> SOC Managé (MSSP)</a></li>
+        </ul>
 
-    <main class="container">
+        <div class="nav-category">Architecture Technique</div>
+        <ul class="nav-links">
+            <li><a href="#siem-architecture"><i class="fa-solid fa-server"></i> SIEM Architecture</a></li>
+            <li><a href="#splunk-deep-dive"><i class="fa-solid fa-terminal"></i> Focus: SPLUNK</a></li>
+            <li><a href="#elk-stack"><i class="fa-brands fa-elastic"></i> Focus: ELK Stack</a></li>
+        </ul>
+
+        <div class="nav-category">Opérations</div>
+        <ul class="nav-links">
+            <li><a href="#cti"><i class="fa-solid fa-chess-board"></i> CTI (Threat Intel)</a></li>
+            <li><a href="#soar-automation"><i class="fa-solid fa-robot"></i> SOAR & Auto</a></li>
+            <li><a href="#voc-offensive"><i class="fa-solid fa-crosshairs"></i> VOC & Vulns</a></li>
+            <li><a href="#ids-ips"><i class="fa-solid fa-network-wired"></i> IDS / IPS / NDR</a></li>
+            <li><a href="#definitions"><i class="fa-solid fa-book-open"></i> Glossaire</a></li>
+        </ul>
+    </nav>
+
+    <main class="main-content">
+
+        <section id="intro">
+            <span class="badge badge-blue">Défense en Profondeur</span>
+            <h1>Architecture de Cyberdéfense</h1>
+            <p>
+                Manuel de référence technique pour les architectures SOC modernes. Ce document couvre la collecte (SIEM), l'analyse, l'intelligence (CTI), l'externalisation (MSSP) et la réponse (SOAR).
+            </p>
+        </section>
 
         <section id="cert-csirt">
-            <h2><i class="fa-solid fa-building-shield"></i> Organismes : CSIRT & CERT</h2>
+            <h2><i class="fa-solid fa-building-shield"></i> 1. Structures : CERT vs CSIRT</h2>
             <div class="grid-2">
-                <div class="card" style="border-top: 4px solid var(--accent-green);">
-                    <div class="card-icon" style="color: var(--accent-green);"><i class="fa-solid fa-bullhorn"></i></div>
-                    <h3>CERT</h3>
-                    <span class="tag tag-green">Alerte & Sensibilisation</span>
-                    <p>Focalisé sur la veille, le traitement des alertes de sécurité et la centralisation.</p>
-                    
-                    <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; margin-top: 15px;">
-                        <strong style="color: var(--text-primary);">CERT-FR (Gouvernemental)</strong>
-                        <ul style="margin-top: 5px; font-size: 0.85rem;">
-                            <li><i class="fa-solid fa-check" style="color: var(--accent-green)"></i> Organismes Publics / Ministères</li>
-                            <li><i class="fa-solid fa-check" style="color: var(--accent-green)"></i> OIV (Opérateurs d'Importance Vitale)</li>
-                            <li><i class="fa-solid fa-check" style="color: var(--accent-green)"></i> OSE (Opérateurs de Services Essentiels)</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <div class="card" style="border-top: 4px solid var(--accent-blue);">
-                    <div class="card-icon" style="color: var(--accent-blue);"><i class="fa-solid fa-truck-medical"></i></div>
-                    <h3>CSIRT</h3>
-                    <span class="tag tag-blue">Réponse à incident</span>
-                    <p>Aide opérationnelle ("Pompiers") pour la réponse, le confinement et la remédiation.</p>
-                    
-                    <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; margin-top: 15px;">
-                        <strong style="color: var(--text-primary);">CSIRT Territoriaux (Régionaux)</strong>
-                        <ul style="margin-top: 5px; font-size: 0.85rem;">
-                            <li><i class="fa-solid fa-map-location-dot" style="color: var(--accent-blue)"></i> <strong>14 centres</strong> (1 par région)</li>
-                            <li><i class="fa-solid fa-users" style="color: var(--accent-blue)"></i> Cible : PME, ETI, Collectivités</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            
-            <div style="margin-top: 2rem; background: rgba(56, 189, 248, 0.1); padding: 1rem; border-radius: 8px; border-left: 4px solid var(--accent-blue);">
-                <strong><i class="fa-solid fa-link"></i> Intérêts pour le SOC :</strong>
-                <span style="color: var(--text-secondary); display: block; margin-top: 5px;">
-                    1. Suivi des incidents & réception de CTI (IoC).<br>
-                    2. Mise en relation avec des experts cyber.<br>
-                    3. Prévention et anticipation des menaces.
-                </span>
-            </div>
-        </section>
-
-        <section id="elk">
-            <h2><i class="fa-solid fa-layer-group"></i> Projet ELK (Elastic Stack)</h2>
-            <p>Solution (SaaS, PaaS ou On-premise) pour regrouper, traiter et stocker les logs de multiples plateformes.</p>
-
-            <div class="workflow">
-                <span style="color:#fff">Flux :</span> Beats <i class="fa-solid fa-arrow-right"></i> Logstash <i class="fa-solid fa-arrow-right"></i> Elasticsearch <i class="fa-solid fa-arrow-right"></i> Kibana
-            </div>
-
-            <div class="grid-4">
                 <div class="card">
-                    <h4 style="color:var(--accent-blue)">1. Beats</h4>
-                    <small>Collecte</small>
-                    <hr style="border-color:#333; margin:10px 0">
-                    <p style="font-size: 0.85rem;">Agents légers sur les machines (Filebeat, Metricbeat). Envoient les données.</p>
-                </div>
-                <div class="card">
-                    <h4 style="color:var(--accent-purple)">2. Logstash</h4>
-                    <small>Traitement (ETL)</small>
-                    <hr style="border-color:#333; margin:10px 0">
-                    <p style="font-size: 0.85rem;">Ingestion, transformation, parsing et enrichissement des logs.</p>
-                </div>
-                <div class="card">
-                    <h4 style="color:var(--accent-green)">3. Elasticsearch</h4>
-                    <small>Stockage</small>
-                    <hr style="border-color:#333; margin:10px 0">
-                    <p style="font-size: 0.85rem;">Moteur de recherche et d'analyse. Indexe les données.</p>
-                </div>
-                <div class="card">
-                    <h4 style="color:var(--accent-red)">4. Kibana</h4>
-                    <small>Visualisation</small>
-                    <hr style="border-color:#333; margin:10px 0">
-                    <p style="font-size: 0.85rem;">Interface graphique. Dashboards, exploration.</p>
-                </div>
-            </div>
-        </section>
-
-        <section id="soar">
-            <h2><i class="fa-solid fa-robot"></i> SOAR</h2>
-            <span class="tag tag-purple">SIEM Évolué</span>
-            <p><strong>Security Orchestration, Automation and Response</strong>. Solution pour orchestrer les outils et automatiser.</p>
-            
-            <div class="grid-2">
-                <div>
-                    <h3><i class="fa-solid fa-gears"></i> Principe Technique</h3>
-                    <ul style="padding-left: 20px; color: var(--text-secondary);">
-                        <li><strong>1. Collecte & Analyse :</strong> Récupère les logs/alertes (SIEM, EDR, AV).</li>
-                        <li><strong>2. Intégration :</strong> Connecte des outils hétérogènes.</li>
-                        <li><strong>3. Orchestration :</strong> Automatise les actions via des playbooks.</li>
+                    <h3 style="color:var(--blue-accent)">CSIRT</h3>
+                    <small>Computer Security Incident Response Team</small>
+                    <p style="margin-top:10px;">Le terme opérationnel standard ("Les Pompiers").</p>
+                    <ul style="padding-left: 20px; font-size: 0.9rem; color: var(--text-muted);">
+                        <li><strong>Réactif :</strong> Réception des tickets, analyse forensique, confinement.</li>
+                        <li><strong>Portée :</strong> Interne (entreprise) ou Territoriale (Région).</li>
                     </ul>
-                    <p style="margin-top:15px; font-style: italic;">"Analyse préliminaire automatisée."</p>
                 </div>
-                
-                <div>
-                    <div class="price-box">
-                        <h4 style="color: var(--accent-purple); margin-bottom: 15px;"><i class="fa-solid fa-coins"></i> Coûts Projet (Estimations)</h4>
-                        <div class="price-item">
-                            <span>Licence</span>
-                            <span>5 000€ - 100 000€</span>
-                        </div>
-                        <div class="price-item">
-                            <span>Infrastructure</span>
-                            <span>10 000€ - 50 000€</span>
-                        </div>
-                    </div>
+                <div class="card">
+                    <h3 style="color:var(--purple-accent)">CERT</h3>
+                    <small>Computer Emergency Response Team</small>
+                    <p style="margin-top:10px;">Focalisé sur la veille, l'alerte et la coopération.</p>
+                    <ul style="padding-left: 20px; font-size: 0.9rem; color: var(--text-muted);">
+                        <li><strong>Préventif :</strong> Veille vulnérabilités, publication de CVE.</li>
+                        <li><strong>Exemple :</strong> CERT-FR (ANSSI) pour les OIV/OSE.</li>
+                    </ul>
                 </div>
             </div>
         </section>
 
-        <section id="voc">
-            <h2><i class="fa-solid fa-magnifying-glass-chart"></i> VOC</h2>
-            <span class="tag tag-red">Approche Offensive</span>
-            <p><strong>Vulnerability Operation Center</strong>. Recherche de failles <em>avant</em> l'attaque.</p>
+        <section id="managed-soc">
+            <h2><i class="fa-solid fa-handshake"></i> 2. SOC Managé (MSSP)</h2>
+            <span class="badge badge-cyan">Stratégie d'Externalisation</span>
+            <p>Construire un SOC interne coûte cher (H24 = minimum 12 analystes). Beaucoup d'entreprises se tournent vers des MSSP (Managed Security Service Providers).</p>
+
+            <div class="grid-2">
+                <div class="card">
+                    <h3><i class="fa-solid fa-sitemap"></i> Modèles de Service</h3>
+                    <ul style="list-style: none; margin-top: 15px;">
+                        <li style="margin-bottom: 15px;">
+                            <strong style="color:var(--blue-accent)">1. Fully Managed :</strong><br>
+                            Le prestataire fait tout. Le client reçoit juste un coup de fil en cas de crise majeure.
+                            <br><small><em>Idéal pour : PME sans équipe IT sécu.</em></small>
+                        </li>
+                        <li style="margin-bottom: 15px;">
+                            <strong style="color:var(--purple-accent)">2. Co-Managed / Hybride :</strong><br>
+                            Le MSSP gère la nuit/week-end (H24) et le "tout venant". L'équipe interne gère les alertes critiques avec le contexte métier.
+                            <br><small><em>Idéal pour : ETI et Grands Groupes.</em></small>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h3><i class="fa-solid fa-plug"></i> Intégration Technique</h3>
+                    <p>Comment le MSSP voit-il votre réseau ?</p>
+                    <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px; margin-top: 10px; font-size: 0.85rem;">
+                        <strong>Option A (VPN) :</strong> Tunnel VPN Site-à-Site pour que le SIEM du MSSP tape dans vos serveurs.<br>
+                        <strong>Option B (Collectors) :</strong> Installation d'une "Black Box" (Collector) chez le client qui compresse et chiffre les logs vers le MSSP.<br>
+                        <strong>Option C (Cloud-to-Cloud) :</strong> Si vous êtes sur Office 365 / AWS, le MSSP se connecte via API.
+                    </div>
+                </div>
+            </div>
+
+            <div class="tech-box" style="border-color: var(--cyan-accent);">
+                <h4 style="color:var(--cyan-accent)">Les SLA (Service Level Agreements)</h4>
+                <p>C'est la partie contractuelle critique. Le MSSP s'engage sur des temps :</p>
+                <ul style="display: flex; gap: 20px; list-style: none; margin-top: 10px; flex-wrap: wrap;">
+                    <li><strong>MTTD</strong> (Mean Time To Detect) : <em style="color:#fff">"Je détecte en < 1h"</em></li>
+                    <li><strong>MTTR</strong> (Mean Time To Respond) : <em style="color:#fff">"J'agis en < 4h"</em></li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="siem-architecture">
+            <h2><i class="fa-solid fa-server"></i> 3. SIEM Architecture</h2>
+            <p>Le SIEM centralise, normalise et corrèle les logs pour détecter les anomalies.</p>
+            
+            
+
+[Image of SIEM data flow architecture]
+
+
+            <div class="flowchart">
+                <div class="step">Collecte<br><small>(Syslog, API)</small></div>
+                <div class="arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                <div class="step">Parsing<br><small>(Clé=Valeur)</small></div>
+                <div class="arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                <div class="step">Corrélation<br><small>(Règles SIEM)</small></div>
+                <div class="arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                <div class="step" style="border-color: var(--red-accent); color: var(--red-accent);">Alerte<br><small>(Incident)</small></div>
+            </div>
+        </section>
+
+        <section id="splunk-deep-dive">
+            <h2><i class="fa-solid fa-terminal"></i> 4. Focus Technique : SPLUNK</h2>
+            <div class="tech-box splunk-box">
+                <h3 style="margin-top:0; color:var(--splunk-green);">Architecture Splunk</h3>
+                <div class="grid-3">
+                    <div>
+                        <strong>1. Forwarders (Agents)</strong>
+                        <p>Universal Forwarder (UF) envoie les logs bruts. Heavy Forwarder (HF) peut les filtrer avant envoi.</p>
+                    </div>
+                    <div>
+                        <strong>2. Indexers (Stockage)</strong>
+                        <p>Reçoivent, parsent et stockent les données dans des "Buckets" (Hot/Warm/Cold).</p>
+                    </div>
+                    <div>
+                        <strong>3. Search Heads (GUI)</strong>
+                        <p>Distribuent les requêtes SPL aux indexers et agrègent les résultats pour l'analyste.</p>
+                    </div>
+                </div>
+            </div>
+
+            
+
+[Image of Splunk detailed architecture components]
+
+
+            <div class="card" style="border-left: 4px solid var(--splunk-green);">
+                <h4>Exemple SPL (Search Processing Language)</h4>
+                <pre><code>index=prod_firewall action=blocked
+| stats count by src_ip
+| where count > 100
+| iplocation src_ip
+| table src_ip, Country, count</code></pre>
+            </div>
+        </section>
+
+        <section id="elk-stack">
+            <h2><i class="fa-brands fa-elastic"></i> 5. Focus : La Stack ELK</h2>
+            <div class="grid-4">
+                <div class="card elastic-box">
+                    <h4 style="color:var(--elastic-yellow)">BEATS</h4>
+                    <small>Agents de collecte (Filebeat, Winlogbeat).</small>
+                </div>
+                <div class="card elastic-box">
+                    <h4 style="color:var(--elastic-yellow)">LOGSTASH</h4>
+                    <small>ETL : Transforme et enrichit les logs.</small>
+                </div>
+                <div class="card elastic-box">
+                    <h4 style="color:var(--elastic-yellow)">ELASTICSEARCH</h4>
+                    <small>Base NoSQL (Moteur de recherche).</small>
+                </div>
+                <div class="card elastic-box">
+                    <h4 style="color:var(--elastic-yellow)">KIBANA</h4>
+                    <small>Interface de visualisation.</small>
+                </div>
+            </div>
+            <p style="margin-top:10px;"><strong>Différence clé :</strong> ELK structure à l'ingestion (Schema on Write), Splunk structure à la lecture (Schema on Read).</p>
+        </section>
+
+        <section id="cti">
+            <h2><i class="fa-solid fa-chess-board"></i> 6. CTI (Cyber Threat Intelligence)</h2>
+            <span class="badge badge-orange">Anticipation</span>
+            <p>La CTI ne consiste pas juste à collecter des "listes noires". C'est l'analyse des capacités, de l'infrastructure et des intentions des attaquants.</p>
+
+            <div class="grid-2">
+                <div class="card cti-box">
+                    <h3 style="color: var(--orange-accent); margin-top:0;">Pyramid of Pain</h3>
+                    <p style="font-size:0.9rem">Plus on monte, plus c'est douloureux pour l'attaquant de changer sa méthode.</p>
+                    
+                    <div class="pyramid-container">
+                        <div class="pyramid-level" style="background: #ef4444; width: 30%;">TTPs (Comportements)</div>
+                        <div class="pyramid-level" style="background: #f97316; width: 45%;">Tools (Outils)</div>
+                        <div class="pyramid-level" style="background: #eab308; width: 60%;">Network / Host Artifacts</div>
+                        <div class="pyramid-level" style="background: #84cc16; width: 75%;">Domain Names</div>
+                        <div class="pyramid-level" style="background: #22c55e; width: 90%;">IP Addresses</div>
+                        <div class="pyramid-level" style="background: #3b82f6; width: 100%;">Hash Values (MD5/SHA)</div>
+                    </div>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                    
+                    <div class="card">
+                        <h4><i class="fa-solid fa-layer-group"></i> Les 3 Niveaux CTI</h4>
+                        <ul style="font-size: 0.9rem; padding-left: 20px;">
+                            <li style="margin-bottom:8px;"><strong>Stratégique :</strong> Pour les décideurs (ex: "APT28 cible l'énergie").</li>
+                            <li style="margin-bottom:8px;"><strong>Opérationnelle :</strong> TTPs (Techniques, Tactics, Procedures).</li>
+                            <li><strong>Tactique :</strong> IoC (IPs, Hashs).</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="card">
+                        <h4><i class="fa-solid fa-code-branch"></i> Standards & Outils</h4>
+                        <p style="font-size: 0.9rem;">Protocole d'échange et plateformes.</p>
+                        <hr style="border-color: var(--border-color); margin: 10px 0;">
+                        
+                        <div style="margin-bottom: 10px;">
+                            <strong style="color:var(--orange-accent)">STIX / TAXII</strong>
+                            <p style="font-size:0.85rem; margin-bottom:5px;">STIX est le format (JSON). TAXII est le protocole de transport.</p>
+                        </div>
+                        
+                        <div>
+                            <strong style="color:var(--orange-accent)">MISP</strong>
+                            <p style="font-size:0.85rem; margin-bottom:0;">(Malware Information Sharing Platform). Outil Open Source de référence pour partager les IoCs.</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <section id="soar-automation">
+            <h2><i class="fa-solid fa-robot"></i> 7. SOAR & Automatisation</h2>
             
             <div class="grid-3">
+                
                 <div class="card">
-                    <h3>Fonctionnement</h3>
-                    <p>Scans réguliers des machines, des services et des IPs.</p>
+                    <h3>Orchestration vs Auto</h3>
+                    <p style="font-size:0.9rem"><strong>Orchestration :</strong> Connecte les outils entre eux via API (SIEM parle au Firewall).</p>
+                    <p style="font-size:0.9rem"><strong>Automatisation :</strong> Exécute des tâches répétitives sans humain.</p>
                 </div>
+
+                <div class="card" style="border: 1px dashed var(--purple-accent);">
+                    <h4 style="color:var(--purple-accent)">Playbook : Phishing</h4>
+                    <ol style="padding-left: 20px; font-size: 0.85rem; color: var(--text-muted);">
+                        <li>Utilisateur signale un mail.</li>
+                        <li>SOAR extrait URL & Pièces jointes.</li>
+                        <li>Analyse via VirusTotal (CTI).</li>
+                        <li>Si positif > Blocage Proxy.</li>
+                        <li>Ticket fermé, user notifié.</li>
+                    </ol>
+                </div>
+
                 <div class="card">
-                    <h3>Organisation</h3>
-                    <p>Le VOC peut être :</p>
-                    <ul style="font-size: 0.85rem; padding-left: 15px;">
-                        <li>Une équipe dédiée</li>
-                        <li>Une fonction du métier</li>
-                        <li>Une plateforme support</li>
+                    <h4><i class="fa-solid fa-toolbox"></i> Outils SOAR</h4>
+                    <ul style="list-style: none; margin-top:10px;">
+                        <li style="margin-bottom:10px; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.05);">
+                            <strong>XSOAR (Palo Alto)</strong><br>
+                            <span style="font-size:0.8rem; color:var(--text-muted);">Le leader du marché (payant).</span>
+                        </li>
+                        <li style="margin-bottom:10px; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.05);">
+                            <strong>Splunk SOAR</strong><br>
+                            <span style="font-size:0.8rem; color:var(--text-muted);">Anciennement Phantom.</span>
+                        </li>
+                        <li>
+                            <strong>TheHive / Cortex</strong><br>
+                            <span style="font-size:0.8rem; color:var(--text-muted);">La référence Open Source.</span>
+                        </li>
                     </ul>
                 </div>
-                <div class="card" style="border-color: var(--accent-red);">
-                    <h3 style="color: var(--accent-red);">Vs SOC</h3>
-                    <p><strong>SOC :</strong> Défensif (Temps réel)</p>
-                    <p><strong>VOC :</strong> Offensif (Préventif)</p>
-                </div>
+
+            </div>
+        </section>
+
+        <section id="voc-offensive">
+            <h2><i class="fa-solid fa-crosshairs"></i> 8. VOC (Vulnerability Operation Center)</h2>
+            <p>Approche préventive. Scan régulier (Nessus, Qualys) pour trouver les failles avant les attaquants.</p>
+            <div class="grid-3">
+                <div class="card"><strong>Scan</strong><br><small>Identifier les ports/services ouverts.</small></div>
+                <div class="card"><strong>Priorisation</strong><br><small>Contextualiser selon le CVSS + Criticité Business.</small></div>
+                <div class="card"><strong>Remédiation</strong><br><small>Patching ou mesures compensatoires.</small></div>
             </div>
         </section>
 
         <section id="ids-ips">
-            <h2><i class="fa-solid fa-network-wired"></i> IDS & IPS</h2>
-            <div class="workflow" style="background: var(--card-bg); text-align: left; border:none;">
-                <i class="fa-solid fa-sitemap"></i> <strong>Chaine d'intégration :</strong> Sonde (IDS/IPS) <i class="fa-solid fa-arrow-right"></i> SIEM (Corrélation) <i class="fa-solid fa-arrow-right"></i> SOC (Analyse)
-            </div>
-
-            <div class="grid-2">
-                <div class="card">
-                    <h3>IDS <span style="font-size:0.7em; color:var(--text-secondary)">(Detection)</span></h3>
-                    <span class="tag tag-blue">Passif</span>
-                    <p>Écoute le réseau, analyse et lève une alerte. Ne modifie pas le trafic.</p>
-                </div>
-                <div class="card">
-                    <h3>IPS <span style="font-size:0.7em; color:var(--text-secondary)">(Prevention)</span></h3>
-                    <span class="tag tag-red">Actif</span>
-                    <p>Analyse et peut <strong>bloquer</strong> les paquets malveillants.</p>
-                    <hr style="border-color:#333; margin:10px 0">
-                    <p><small><strong>HIPS :</strong> IPS au niveau de l'hôte (Endpoint) ou sur éléments réseaux (FW/WAF).</small></p>
-                </div>
-            </div>
-            
-            <div class="alert-box">
-                <i class="fa-solid fa-triangle-exclamation"></i> <strong>Point Négatif Majeur : Les Faux Négatifs</strong><br>
-                Risque de non-détection d'une menace réelle.
-                <br><em>Solution :</em> Mettre à jour très régulièrement la base de données de signatures.
-            </div>
+            <h2><i class="fa-solid fa-network-wired"></i> 9. IDS / IPS / NDR</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Position</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="color:var(--blue-accent)"><strong>IDS</strong> (Detection)</td>
+                        <td>Parallèle (Mirroring). Invisible.</td>
+                        <td>Alerte uniquement. Pas d'impact prod.</td>
+                    </tr>
+                    <tr>
+                        <td style="color:var(--red-accent)"><strong>IPS</strong> (Prevention)</td>
+                        <td>En coupure (Inline).</td>
+                        <td>Bloque les paquets. Risque de Faux Positif.</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p><strong>NDR (Network Detection & Response) :</strong> Analyse comportementale (IA) du réseau pour trouver ce que les signatures ratent.</p>
         </section>
 
         <section id="definitions">
-            <h2><i class="fa-solid fa-book"></i> Définitions & Concepts</h2>
-            
-            <div class="grid-2">
-                <div class="card" style="background: linear-gradient(145deg, #1e293b, #243045);">
-                    <h3 style="color: var(--accent-yellow);">MDR</h3>
-                    <p><strong>Managed Detection and Response</strong></p>
-                    <p>C'est un EDR géré par une entreprise externe. Externalisation de la surveillance et de la réponse.</p>
-                </div>
-
+            <h2><i class="fa-solid fa-book-open"></i> 10. Glossaire Technique</h2>
+            <div class="grid-4">
                 <div class="card">
-                    <h3 style="color: var(--accent-purple);">Évolution SIEM</h3>
-                    <ul style="margin-top:10px;">
-                        <li style="margin-bottom: 10px;">
-                            <strong style="color: var(--text-primary);">SIM :</strong> Security Information Management.<br>
-                            <small>Gestion, stockage et conformité (Long terme).</small>
-                        </li>
-                        <li style="margin-bottom: 10px;">
-                            <strong style="color: var(--text-primary);">SEM :</strong> Security Event Management.<br>
-                            <small>Gestion des événements en temps réel (Monitoring).</small>
-                        </li>
-                        <li>
-                            <strong style="color: var(--accent-purple);">SIEM :</strong> Fusion des deux (SIM + SEM).
-                        </li>
-                    </ul>
+                    <strong>EDR</strong><br>
+                    <small>Endpoint Detection & Response</small>
+                    <p style="font-size:0.8rem">Sonde intelligente sur les PC/Serveurs. Enregistre l'activité locale.</p>
+                </div>
+                <div class="card">
+                    <strong>XDR</strong><br>
+                    <small>Extended Detection & Response</small>
+                    <p style="font-size:0.8rem">Unification propriétaire (EDR + NDR + Cloud + Identity).</p>
+                </div>
+                <div class="card">
+                    <strong>MITRE ATT&CK</strong><br>
+                    <small>Base de connaissance</small>
+                    <p style="font-size:0.8rem">La "bible" des techniques d'attaques (TTPs) observées dans le monde.</p>
+                </div>
+                <div class="card">
+                    <strong>IoC</strong><br>
+                    <small>Indicator of Compromise</small>
+                    <p style="font-size:0.8rem">Preuve technique d'une attaque (Hash fichier, IP C2, Nom de domaine).</p>
                 </div>
             </div>
         </section>
 
+        <footer>
+            <p>&copy; 2025 Titouan GIBERT - Note SOC.</p>
+        </footer>
+
     </main>
-
-    <footer>
-        <p>&copy; 2025 - CyberSec Notes - Synthèse de cours - Titouan GIBERT</p>
-    </footer>
-
 </body>
 </html>
