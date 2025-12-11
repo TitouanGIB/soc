@@ -18,6 +18,7 @@
             --accent-red: #f87171;
             --accent-purple: #c084fc;
             --accent-yellow: #facc15;
+            --accent-orange: #fb923c;
             --border-color: #334155;
         }
 
@@ -34,7 +35,6 @@
             line-height: 1.6;
         }
 
-        /* --- Header --- */
         header {
             background: rgba(15, 23, 42, 0.95);
             border-bottom: 1px solid var(--border-color);
@@ -70,16 +70,29 @@
             margin-left: 20px;
             font-size: 0.9rem;
             transition: color 0.3s;
+            cursor: pointer;
         }
 
         .nav-links a:hover {
             color: var(--accent-blue);
         }
 
-        /* --- Sections --- */
+        .page {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         section {
             padding: 4rem 0;
-            border-bottom: 1px solid var(--border-color);
         }
 
         h2 {
@@ -105,7 +118,6 @@
             list-style-type: none;
         }
 
-        /* --- Cards Grid --- */
         .grid-2 {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -143,7 +155,6 @@
             margin-bottom: 1rem;
         }
 
-        /* --- Specific Styling --- */
         .tag {
             display: inline-block;
             padding: 4px 10px;
@@ -159,6 +170,7 @@
         .tag-green { background: rgba(74, 222, 128, 0.2); color: var(--accent-green); }
         .tag-red { background: rgba(248, 113, 113, 0.2); color: var(--accent-red); }
         .tag-purple { background: rgba(192, 132, 252, 0.2); color: var(--accent-purple); }
+        .tag-orange { background: rgba(251, 146, 60, 0.2); color: var(--accent-orange); }
 
         .workflow {
             font-family: 'JetBrains Mono', monospace;
@@ -199,16 +211,53 @@
             font-size: 0.9rem;
         }
 
-        /* --- Footer --- */
+        .info-box {
+            margin-top: 2rem;
+            background: rgba(56, 189, 248, 0.1);
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent-blue);
+        }
+
+        .highlight-box {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .architecture-img {
+            width: 100%;
+            max-width: 800px;
+            margin: 2rem auto;
+            display: block;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
+
+        .exigences-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .exigence-item {
+            background: rgba(255,255,255,0.03);
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 3px solid var(--accent-blue);
+        }
+
         footer {
             text-align: center;
             padding: 3rem 0;
             color: var(--text-secondary);
             font-size: 0.9rem;
             border-top: 1px solid var(--border-color);
+            margin-top: 2rem;
         }
 
-        /* --- Responsive --- */
         @media (max-width: 768px) {
             h2 { font-size: 1.5rem; }
             .nav-links { display: none; }
@@ -222,12 +271,11 @@
             <nav>
                 <div class="logo"><i class="fa-solid fa-shield-halved"></i> CyberNotes_</div>
                 <div class="nav-links">
-                    <a href="#cert-csirt">CERT/CSIRT</a>
-                    <a href="#elk">ELK</a>
-                    <a href="#soar">SOAR</a>
-                    <a href="#voc">VOC</a>
-                    <a href="#ids-ips">IDS/IPS</a>
-                    <a href="#definitions">Définitions</a>
+                    <a onclick="showPage('page1')">CERT/CSIRT</a>
+                    <a onclick="showPage('page2')">ELK/SOAR</a>
+                    <a onclick="showPage('page3')">VOC/IDS</a>
+                    <a onclick="showPage('page4')">LPM/PDIS</a>
+                    <a onclick="showPage('page5')">Définitions</a>
                 </div>
             </nav>
         </div>
@@ -235,208 +283,618 @@
 
     <main class="container">
 
-        <section id="cert-csirt">
-            <h2><i class="fa-solid fa-building-shield"></i> Organismes : CSIRT & CERT</h2>
-            <div class="grid-2">
-                <div class="card" style="border-top: 4px solid var(--accent-green);">
-                    <div class="card-icon" style="color: var(--accent-green);"><i class="fa-solid fa-bullhorn"></i></div>
-                    <h3>CERT</h3>
-                    <span class="tag tag-green">Alerte & Sensibilisation</span>
-                    <p>Focalisé sur la veille, le traitement des alertes de sécurité et la centralisation.</p>
-                    
-                    <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; margin-top: 15px;">
-                        <strong style="color: var(--text-primary);">CERT-FR (Gouvernemental)</strong>
-                        <ul style="margin-top: 5px; font-size: 0.85rem;">
-                            <li><i class="fa-solid fa-check" style="color: var(--accent-green)"></i> Organismes Publics / Ministères</li>
-                            <li><i class="fa-solid fa-check" style="color: var(--accent-green)"></i> OIV (Opérateurs d'Importance Vitale)</li>
-                            <li><i class="fa-solid fa-check" style="color: var(--accent-green)"></i> OSE (Opérateurs de Services Essentiels)</li>
-                        </ul>
+        <!-- PAGE 1: CERT/CSIRT -->
+        <div id="page1" class="page active">
+            <section>
+                <h2><i class="fa-solid fa-building-shield"></i> Organismes : CSIRT & CERT</h2>
+                <div class="grid-2">
+                    <div class="card" style="border-top: 4px solid var(--accent-green);">
+                        <div class="card-icon" style="color: var(--accent-green);"><i class="fa-solid fa-bullhorn"></i></div>
+                        <h3>CERT</h3>
+                        <span class="tag tag-green">Alerte & Sensibilisation</span>
+                        <p>Focalisé sur la veille, le traitement des alertes de sécurité et la centralisation.</p>
+                        
+                        <div class="highlight-box">
+                            <strong style="color: var(--text-primary);">CERT-FR (Gouvernemental)</strong>
+                            <ul style="margin-top: 5px; font-size: 0.85rem;">
+                                <li><i class="fa-solid fa-check" style="color: var(--accent-green)"></i> Organismes Publics / Ministères</li>
+                                <li><i class="fa-solid fa-check" style="color: var(--accent-green)"></i> OIV (Opérateurs d'Importance Vitale)</li>
+                                <li><i class="fa-solid fa-check" style="color: var(--accent-green)"></i> OSE (Opérateurs de Services Essentiels)</li>
+                            </ul>
+                        </div>
                     </div>
-                </div>
 
-                <div class="card" style="border-top: 4px solid var(--accent-blue);">
-                    <div class="card-icon" style="color: var(--accent-blue);"><i class="fa-solid fa-truck-medical"></i></div>
-                    <h3>CSIRT</h3>
-                    <span class="tag tag-blue">Réponse à incident</span>
-                    <p>Aide opérationnelle ("Pompiers") pour la réponse, le confinement et la remédiation.</p>
-                    
-                    <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; margin-top: 15px;">
-                        <strong style="color: var(--text-primary);">CSIRT Territoriaux (Régionaux)</strong>
-                        <ul style="margin-top: 5px; font-size: 0.85rem;">
-                            <li><i class="fa-solid fa-map-location-dot" style="color: var(--accent-blue)"></i> <strong>14 centres</strong> (1 par région)</li>
-                            <li><i class="fa-solid fa-users" style="color: var(--accent-blue)"></i> Cible : PME, ETI, Collectivités</li>
-                        </ul>
+                    <div class="card" style="border-top: 4px solid var(--accent-blue);">
+                        <div class="card-icon" style="color: var(--accent-blue);"><i class="fa-solid fa-truck-medical"></i></div>
+                        <h3>CSIRT</h3>
+                        <span class="tag tag-blue">Réponse à incident</span>
+                        <p>Aide opérationnelle ("Pompiers") pour la réponse, le confinement et la remédiation.</p>
+                        
+                        <div class="highlight-box">
+                            <strong style="color: var(--text-primary);">CSIRT Territoriaux (Régionaux)</strong>
+                            <ul style="margin-top: 5px; font-size: 0.85rem;">
+                                <li><i class="fa-solid fa-map-location-dot" style="color: var(--accent-blue)"></i> <strong>14 centres</strong> (1 par région)</li>
+                                <li><i class="fa-solid fa-users" style="color: var(--accent-blue)"></i> Cible : PME, ETI, Collectivités</li>
+                            </ul>
+                        </div>
                     </div>
-                </div>
-            </div>
-            
-            <div style="margin-top: 2rem; background: rgba(56, 189, 248, 0.1); padding: 1rem; border-radius: 8px; border-left: 4px solid var(--accent-blue);">
-                <strong><i class="fa-solid fa-link"></i> Intérêts pour le SOC :</strong>
-                <span style="color: var(--text-secondary); display: block; margin-top: 5px;">
-                    1. Suivi des incidents & réception de CTI (IoC).<br>
-                    2. Mise en relation avec des experts cyber.<br>
-                    3. Prévention et anticipation des menaces.
-                </span>
-            </div>
-        </section>
-
-        <section id="elk">
-            <h2><i class="fa-solid fa-layer-group"></i> Projet ELK (Elastic Stack)</h2>
-            <p>Solution (SaaS, PaaS ou On-premise) pour regrouper, traiter et stocker les logs de multiples plateformes.</p>
-
-            <div class="workflow">
-                <span style="color:#fff">Flux :</span> Beats <i class="fa-solid fa-arrow-right"></i> Logstash <i class="fa-solid fa-arrow-right"></i> Elasticsearch <i class="fa-solid fa-arrow-right"></i> Kibana
-            </div>
-
-            <div class="grid-4">
-                <div class="card">
-                    <h4 style="color:var(--accent-blue)">1. Beats</h4>
-                    <small>Collecte</small>
-                    <hr style="border-color:#333; margin:10px 0">
-                    <p style="font-size: 0.85rem;">Agents légers sur les machines (Filebeat, Metricbeat). Envoient les données.</p>
-                </div>
-                <div class="card">
-                    <h4 style="color:var(--accent-purple)">2. Logstash</h4>
-                    <small>Traitement (ETL)</small>
-                    <hr style="border-color:#333; margin:10px 0">
-                    <p style="font-size: 0.85rem;">Ingestion, transformation, parsing et enrichissement des logs.</p>
-                </div>
-                <div class="card">
-                    <h4 style="color:var(--accent-green)">3. Elasticsearch</h4>
-                    <small>Stockage</small>
-                    <hr style="border-color:#333; margin:10px 0">
-                    <p style="font-size: 0.85rem;">Moteur de recherche et d'analyse. Indexe les données.</p>
-                </div>
-                <div class="card">
-                    <h4 style="color:var(--accent-red)">4. Kibana</h4>
-                    <small>Visualisation</small>
-                    <hr style="border-color:#333; margin:10px 0">
-                    <p style="font-size: 0.85rem;">Interface graphique. Dashboards, exploration.</p>
-                </div>
-            </div>
-        </section>
-
-        <section id="soar">
-            <h2><i class="fa-solid fa-robot"></i> SOAR</h2>
-            <span class="tag tag-purple">SIEM Évolué</span>
-            <p><strong>Security Orchestration, Automation and Response</strong>. Solution pour orchestrer les outils et automatiser.</p>
-            
-            <div class="grid-2">
-                <div>
-                    <h3><i class="fa-solid fa-gears"></i> Principe Technique</h3>
-                    <ul style="padding-left: 20px; color: var(--text-secondary);">
-                        <li><strong>1. Collecte & Analyse :</strong> Récupère les logs/alertes (SIEM, EDR, AV).</li>
-                        <li><strong>2. Intégration :</strong> Connecte des outils hétérogènes.</li>
-                        <li><strong>3. Orchestration :</strong> Automatise les actions via des playbooks.</li>
-                    </ul>
-                    <p style="margin-top:15px; font-style: italic;">"Analyse préliminaire automatisée."</p>
                 </div>
                 
-                <div>
-                    <div class="price-box">
-                        <h4 style="color: var(--accent-purple); margin-bottom: 15px;"><i class="fa-solid fa-coins"></i> Coûts Projet (Estimations)</h4>
-                        <div class="price-item">
-                            <span>Licence</span>
-                            <span>5 000€ - 100 000€</span>
-                        </div>
-                        <div class="price-item">
-                            <span>Infrastructure</span>
-                            <span>10 000€ - 50 000€</span>
+                <div class="info-box">
+                    <strong><i class="fa-solid fa-link"></i> Intérêts pour le SOC :</strong>
+                    <span style="color: var(--text-secondary); display: block; margin-top: 5px;">
+                        1. Suivi des incidents & réception de CTI (IoC).<br>
+                        2. Mise en relation avec des experts cyber.<br>
+                        3. Prévention et anticipation des menaces.
+                    </span>
+                </div>
+            </section>
+        </div>
+
+        <!-- PAGE 2: ELK & SOAR -->
+        <div id="page2" class="page">
+            <section>
+                <h2><i class="fa-solid fa-layer-group"></i> Projet ELK (Elastic Stack)</h2>
+                <p>Solution (SaaS, PaaS ou On-premise) pour regrouper, traiter et stocker les logs de multiples plateformes.</p>
+
+                <div class="workflow">
+                    <span style="color:#fff">Flux :</span> Beats <i class="fa-solid fa-arrow-right"></i> Logstash <i class="fa-solid fa-arrow-right"></i> Elasticsearch <i class="fa-solid fa-arrow-right"></i> Kibana
+                </div>
+
+                <div class="grid-4">
+                    <div class="card">
+                        <h4 style="color:var(--accent-blue)">1. Beats</h4>
+                        <small>Collecte</small>
+                        <hr style="border-color:#333; margin:10px 0">
+                        <p style="font-size: 0.85rem;">Agents légers sur les machines (Filebeat, Metricbeat). Envoient les données.</p>
+                    </div>
+                    <div class="card">
+                        <h4 style="color:var(--accent-purple)">2. Logstash</h4>
+                        <small>Traitement (ETL)</small>
+                        <hr style="border-color:#333; margin:10px 0">
+                        <p style="font-size: 0.85rem;">Ingestion, transformation, parsing et enrichissement des logs.</p>
+                    </div>
+                    <div class="card">
+                        <h4 style="color:var(--accent-green)">3. Elasticsearch</h4>
+                        <small>Stockage</small>
+                        <hr style="border-color:#333; margin:10px 0">
+                        <p style="font-size: 0.85rem;">Moteur de recherche et d'analyse. Indexe les données.</p>
+                    </div>
+                    <div class="card">
+                        <h4 style="color:var(--accent-red)">4. Kibana</h4>
+                        <small>Visualisation</small>
+                        <hr style="border-color:#333; margin:10px 0">
+                        <p style="font-size: 0.85rem;">Interface graphique. Dashboards, exploration.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section style="margin-top: 3rem;">
+                <h2><i class="fa-solid fa-robot"></i> SOAR</h2>
+                <span class="tag tag-purple">SIEM Évolué</span>
+                <p><strong>Security Orchestration, Automation and Response</strong>. Solution pour orchestrer les outils et automatiser.</p>
+                
+                <div class="grid-2">
+                    <div>
+                        <h3><i class="fa-solid fa-gears"></i> Principe Technique</h3>
+                        <ul style="padding-left: 20px; color: var(--text-secondary);">
+                            <li><strong>1. Collecte & Analyse :</strong> Récupère les logs/alertes (SIEM, EDR, AV).</li>
+                            <li><strong>2. Intégration :</strong> Connecte des outils hétérogènes.</li>
+                            <li><strong>3. Orchestration :</strong> Automatise les actions via des playbooks.</li>
+                        </ul>
+                        <p style="margin-top:15px; font-style: italic;">"Analyse préliminaire automatisée."</p>
+                    </div>
+                    
+                    <div>
+                        <div class="price-box">
+                            <h4 style="color: var(--accent-purple); margin-bottom: 15px;"><i class="fa-solid fa-coins"></i> Coûts Projet (Estimations)</h4>
+                            <div class="price-item">
+                                <span>Licence</span>
+                                <span>5 000€ - 100 000€</span>
+                            </div>
+                            <div class="price-item">
+                                <span>Infrastructure</span>
+                                <span>10 000€ - 50 000€</span>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </section>
+            </section>
+        </div>
 
-        <section id="voc">
-            <h2><i class="fa-solid fa-magnifying-glass-chart"></i> VOC</h2>
-            <span class="tag tag-red">Approche Offensive</span>
-            <p><strong>Vulnerability Operation Center</strong>. Recherche de failles <em>avant</em> l'attaque.</p>
-            
-            <div class="grid-3">
-                <div class="card">
-                    <h3>Fonctionnement</h3>
-                    <p>Scans réguliers des machines, des services et des IPs.</p>
+        <!-- PAGE 3: VOC & IDS/IPS -->
+        <div id="page3" class="page">
+            <section>
+                <h2><i class="fa-solid fa-magnifying-glass-chart"></i> VOC</h2>
+                <span class="tag tag-red">Approche Offensive</span>
+                <p><strong>Vulnerability Operation Center</strong>. Recherche de failles <em>avant</em> l'attaque.</p>
+                
+                <div class="grid-3">
+                    <div class="card">
+                        <h3>Fonctionnement</h3>
+                        <p>Scans réguliers des machines, des services et des IPs.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Organisation</h3>
+                        <p>Le VOC peut être :</p>
+                        <ul style="font-size: 0.85rem; padding-left: 15px;">
+                            <li>Une équipe dédiée</li>
+                            <li>Une fonction du métier</li>
+                            <li>Une plateforme support</li>
+                        </ul>
+                    </div>
+                    <div class="card" style="border-color: var(--accent-red);">
+                        <h3 style="color: var(--accent-red);">Vs SOC</h3>
+                        <p><strong>SOC :</strong> Défensif (Temps réel)</p>
+                        <p><strong>VOC :</strong> Offensif (Préventif)</p>
+                    </div>
                 </div>
-                <div class="card">
-                    <h3>Organisation</h3>
-                    <p>Le VOC peut être :</p>
-                    <ul style="font-size: 0.85rem; padding-left: 15px;">
-                        <li>Une équipe dédiée</li>
-                        <li>Une fonction du métier</li>
-                        <li>Une plateforme support</li>
+            </section>
+
+            <section style="margin-top: 3rem;">
+                <h2><i class="fa-solid fa-network-wired"></i> IDS & IPS</h2>
+                <div class="workflow" style="background: var(--card-bg); text-align: left; border:none;">
+                    <i class="fa-solid fa-sitemap"></i> <strong>Chaine d'intégration :</strong> Sonde (IDS/IPS) <i class="fa-solid fa-arrow-right"></i> SIEM (Corrélation) <i class="fa-solid fa-arrow-right"></i> SOC (Analyse)
+                </div>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <h3>IDS <span style="font-size:0.7em; color:var(--text-secondary)">(Detection)</span></h3>
+                        <span class="tag tag-blue">Passif</span>
+                        <p>Écoute le réseau, analyse et lève une alerte. Ne modifie pas le trafic.</p>
+                    </div>
+                    <div class="card">
+                        <h3>IPS <span style="font-size:0.7em; color:var(--text-secondary)">(Prevention)</span></h3>
+                        <span class="tag tag-red">Actif</span>
+                        <p>Analyse et peut <strong>bloquer</strong> les paquets malveillants.</p>
+                        <hr style="border-color:#333; margin:10px 0">
+                        <p><small><strong>HIPS :</strong> IPS au niveau de l'hôte (Endpoint) ou sur éléments réseaux (FW/WAF).</small></p>
+                    </div>
+                </div>
+                
+                <div class="alert-box">
+                    <i class="fa-solid fa-triangle-exclamation"></i> <strong>Point Négatif Majeur : Les Faux Négatifs</strong><br>
+                    Risque de non-détection d'une menace réelle.
+                    <br><em>Solution :</em> Mettre à jour très régulièrement la base de données de signatures.
+                </div>
+            </section>
+        </div>
+
+        <!-- PAGE 4: LPM & PDIS -->
+        <div id="page4" class="page">
+            <section>
+                <h2><i class="fa-solid fa-landmark"></i> La Loi de Programmation Militaire (LPM)</h2>
+                
+                <div class="card" style="background: linear-gradient(145deg, #1e293b, #243045); border-left: 4px solid var(--accent-orange);">
+                    <h3><i class="fa-solid fa-file-contract"></i> Corps de l'arrêté</h3>
+                    <ul style="padding-left: 20px; margin-top: 1rem;">
+                        <li><i class="fa-solid fa-bell" style="color: var(--accent-orange)"></i> <strong>Obligation de déclarer à l'ANSSI</strong> les incidents de sécurité</li>
+                        <li><i class="fa-solid fa-shield-alt" style="color: var(--accent-orange)"></i> <strong>Annexe 1 :</strong> 20 règles de sécurité</li>
+                        <li><i class="fa-solid fa-eye-slash" style="color: var(--accent-orange)"></i> <strong>Annexe 4 (Diffusion Restreinte) :</strong> Types d'incidents de sécurité à déclarer</li>
                     </ul>
                 </div>
-                <div class="card" style="border-color: var(--accent-red);">
-                    <h3 style="color: var(--accent-red);">Vs SOC</h3>
-                    <p><strong>SOC :</strong> Défensif (Temps réel)</p>
-                    <p><strong>VOC :</strong> Offensif (Préventif)</p>
-                </div>
-            </div>
-        </section>
 
-        <section id="ids-ips">
-            <h2><i class="fa-solid fa-network-wired"></i> IDS & IPS</h2>
-            <div class="workflow" style="background: var(--card-bg); text-align: left; border:none;">
-                <i class="fa-solid fa-sitemap"></i> <strong>Chaine d'intégration :</strong> Sonde (IDS/IPS) <i class="fa-solid fa-arrow-right"></i> SIEM (Corrélation) <i class="fa-solid fa-arrow-right"></i> SOC (Analyse)
-            </div>
-
-            <div class="grid-2">
-                <div class="card">
-                    <h3>IDS <span style="font-size:0.7em; color:var(--text-secondary)">(Detection)</span></h3>
-                    <span class="tag tag-blue">Passif</span>
-                    <p>Écoute le réseau, analyse et lève une alerte. Ne modifie pas le trafic.</p>
+                <div class="alert-box" style="border-color: var(--accent-orange); background: rgba(251, 146, 60, 0.05); color: var(--accent-orange); margin-top: 2rem;">
+                    <i class="fa-solid fa-exclamation-circle"></i> <strong>Pour les SIIV (Systèmes d'Information d'Importance Vitale)</strong><br>
+                    L'appel à un <strong>Prestataire de Détection des Incidents de Sécurité (PDIS)</strong> est obligatoire.
                 </div>
-                <div class="card">
-                    <h3>IPS <span style="font-size:0.7em; color:var(--text-secondary)">(Prevention)</span></h3>
-                    <span class="tag tag-red">Actif</span>
-                    <p>Analyse et peut <strong>bloquer</strong> les paquets malveillants.</p>
-                    <hr style="border-color:#333; margin:10px 0">
-                    <p><small><strong>HIPS :</strong> IPS au niveau de l'hôte (Endpoint) ou sur éléments réseaux (FW/WAF).</small></p>
-                </div>
-            </div>
-            
-            <div class="alert-box">
-                <i class="fa-solid fa-triangle-exclamation"></i> <strong>Point Négatif Majeur : Les Faux Négatifs</strong><br>
-                Risque de non-détection d'une menace réelle.
-                <br><em>Solution :</em> Mettre à jour très régulièrement la base de données de signatures.
-            </div>
-        </section>
+            </section>
 
-        <section id="definitions">
-            <h2><i class="fa-solid fa-book"></i> Définitions & Concepts</h2>
-            
-            <div class="grid-2">
+            <section style="margin-top: 3rem;">
+                <h2><i class="fa-solid fa-certificate"></i> SOC PDIS - Qualification</h2>
+                <span class="tag tag-orange">Obligation LPM</span>
+                
+                <div class="grid-2" style="margin-top: 2rem;">
+                    <div class="card">
+                        <h3><i class="fa-solid fa-users-gear"></i> Prestataires Qualifiés</h3>
+                        <p>Les prestataires exploitant les systèmes de détection doivent être qualifiés :</p>
+                        <ul style="padding-left: 20px; margin-top: 1rem;">
+                            <li><strong>PDIS :</strong> Prestataires de Détection des Incidents de Sécurité</li>
+                            <li><strong>PRIS :</strong> Prestataires de Réponse aux Incidents de Sécurité</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <h3><i class="fa-solid fa-building"></i> SOC Interne</h3>
+                        <p>Les équipes internes aux entreprises doivent également être qualifiées si elles veulent exploiter elles-mêmes leurs systèmes de détection.</p>
+                    </div>
+                </div>
+
+                <div class="highlight-box" style="margin-top: 2rem;">
+                    <h4 style="color: var(--accent-blue); margin-bottom: 10px;"><i class="fa-solid fa-calendar"></i> Historique du référentiel</h4>
+                    <ul style="font-size: 0.9rem;">
+                        <li><strong>12/2015 :</strong> Première version officielle du référentiel PDIS (v1.0)</li>
+                        <li><strong>12/2017 :</strong> Deuxième version officielle référentiel PDIS (v2.0)</li>
+                        <li><strong>01/2018 :</strong> Version 2.0 en vigueur</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section style="margin-top: 3rem;">
+                <h2><i class="fa-solid fa-list-check"></i> Référentiel d'exigences PDIS</h2>
+                
+                <div class="info-box">
+                    <strong><i class="fa-solid fa-bullseye"></i> Objectif à retenir :</strong>
+                    <p style="margin-top: 10px;">Définir des exigences pour qualifier les prestataires de détection des incidents de sécurité au profit des OIV ou pour qu'une OIV qualifie son propre SOC interne.</p>
+                </div>
+
+                <div class="card" style="margin-top: 2rem; background: linear-gradient(145deg, #1e293b, #1a2332);">
+                    <h3 style="color: var(--accent-purple);"><i class="fa-solid fa-chart-bar"></i> Le référentiel PDIS est dense</h3>
+                    <p style="margin-bottom: 1.5rem;">Il pointe sur d'autres documents à respecter :</p>
+                    
+                    <div class="grid-3">
+                        <div style="background: rgba(192, 132, 252, 0.1); padding: 1.5rem; border-radius: 8px; text-align: center;">
+                            <h4 style="color: var(--accent-purple); font-size: 2rem; margin-bottom: 5px;">63</h4>
+                            <small>Rubriques PDIS</small>
+                            <h4 style="color: var(--accent-purple); font-size: 2rem; margin-top: 10px;">275</h4>
+                            <small>Exigences</small>
+                        </div>
+                        
+                        <div style="background: rgba(74, 222, 128, 0.1); padding: 1.5rem; border-radius: 8px; text-align: center;">
+                            <h4 style="color: var(--accent-green); font-size: 2rem; margin-bottom: 5px;">13</h4>
+                            <small>Rubriques Guide ANSSI</small>
+                            <h4 style="color: var(--accent-green); font-size: 2rem; margin-top: 10px;">40</h4>
+                            <small>Exigences</small>
+                        </div>
+                        
+                        <div style="background: rgba(56, 189, 248, 0.1); padding: 1.5rem; border-radius: 8px; text-align: center;">
+                            <h4 style="color: var(--accent-blue); font-size: 2rem; margin-bottom: 5px;">13</h4>
+                            <small>Rubriques Instruction 901</small>
+                            <h4 style="color: var(--accent-blue); font-size: 2rem; margin-top: 10px;">182</h4>
+                            <small>Exigences</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exigences-list">
+                    <div class="card" style="border-left: 3px solid var(--accent-blue);">
+                        <h4 style="color: var(--accent-blue);"><i class="fa-solid fa-cogs"></i> Activités du service</h4>
+                        <ul style="font-size: 0.85rem; margin-top: 10px;">
+                            <li>• Gestion des évènements</li>
+                            <li>• Gestion des incidents</li>
+                            <li>• Gestion des notifications</li>
+                        </ul>
+                    </div>
+
+                    <div class="card" style="border-left: 3px solid var(--accent-green);">
+                        <h4 style="color: var(--accent-green);"><i class="fa-solid fa-lock"></i> Protection de l'information</h4>
+                        <ul style="font-size: 0.85rem; margin-top: 10px;">
+                            <li>• PSSI</li>
+                            <li>• Niveau de sensibilité</li>
+                            <li>• Classification</li>
+                            <li>• Territorialité</li>
+                        </ul>
+                    </div>
+
+                    <div class="card" style="border-left: 3px solid var(--accent-purple);">
+                        <h4 style="color: var(--accent-purple);"><i class="fa-solid fa-users"></i> Organisation</h4>
+                        <ul style="font-size: 0.85rem; margin-top: 10px;">
+                            <li>• Charte d'éthique</li>
+                            <li>• Recrutement</li>
+                            <li>• Gestion des compétences</li>
+                            <li>• Comités opérationnels</li>
+                        </ul>
+                    </div>
+
+                    <div class="card" style="border-left: 3px solid var(--accent-red);">
+                        <h4 style="color: var(--accent-red);"><i class="fa-solid fa-star"></i> Qualité & Service</h4>
+                        <ul style="font-size: 0.85rem; margin-top: 10px;">
+                            <li>• Qualité du service</li>
+                            <li>• Réversibilité</li>
+                            <li>• Convention de service</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div style="margin-top: 2rem; padding: 2rem; background: rgba(56, 189, 248, 0.05); border-radius: 12px; border: 1px solid var(--accent-blue);">
+                    <h3 style="color: var(--accent-blue);"><i class="fa-solid fa-network-wired"></i> Exigences Techniques</h3>
+                    <div class="grid-2" style="margin-top: 1.5rem; gap: 1rem;">
+                        <div>
+                            <ul style="font-size: 0.9rem;">
+                                <li>✓ Contrôles</li>
+                                <li>✓ Sécurité physique</li>
+                                <li>✓ Sauvegardes</li>
+                                <li>✓ Service de détection du service</li>
+                                <li>✓ Cloisonnement</li>
+                                <li>✓ Administration et exploitation</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <ul style="font-size: 0.9rem;">
+                                <li>✓ Interconnexions</li>
+                                <li>✓ Zone de mise à jour</li>
+                                <li>✓ Zone de notification</li>
+                                <li>✓ Zone d'échange commanditaire</li>
+                                <li>✓ Enclave de consultation</li>
+                                <li>✓ Enclave de collecte</li>
+                                <li>✓ Zone internet</li>
+                                <li>✓ Accès nomades</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section style="margin-top: 3rem;">
+                <h2><i class="fa-solid fa-radar"></i> Activités Spécifiques du SOC PDIS</h2>
+                
+                <div class="grid-3">
+                    <div class="card" style="border-top: 4px solid var(--accent-blue);">
+                        <div class="card-icon" style="color: var(--accent-blue);"><i class="fa-solid fa-database"></i></div>
+                        <h3>1. Recueillir</h3>
+                        <p>Collecte des logs et événements de sécurité provenant des différentes sources du SI.</p>
+                    </div>
+
+                    <div class="card" style="border-top: 4px solid var(--accent-purple);">
+                        <div class="card-icon" style="color: var(--accent-purple);"><i class="fa-solid fa-search"></i></div>
+                        <h3>2. Identifier</h3>
+                        <p>Analyse et corrélation des événements pour détecter les incidents de sécurité.</p>
+                    </div>
+
+                    <div class="card" style="border-top: 4px solid var(--accent-green);">
+                        <div class="card-icon" style="color: var(--accent-green);"><i class="fa-solid fa-bell"></i></div>
+                        <h3>3. Notifier</h3>
+                        <p>Alerter le commanditaire et l'ANSSI selon les procédures établies.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section style="margin-top: 3rem;">
+                <h2><i class="fa-solid fa-puzzle-piece"></i> Éléments Structurants du PDIS</h2>
+                
+                <div class="card" style="background: linear-gradient(145deg, #1e293b, #1a2332);">
+                    <ul style="font-size: 0.95rem; line-height: 2;">
+                        <li><i class="fa-solid fa-check-circle" style="color: var(--accent-green)"></i> Mise en place d'un <strong>réseau dédié à la détection</strong> avec un cloisonnement en plusieurs zones de confiance : collecte, analyse, notification, administration, exploitation, etc.</li>
+                        <li><i class="fa-solid fa-check-circle" style="color: var(--accent-green)"></i> Utilisation de <strong>sondes souveraines & qualifiées par l'ANSSI</strong></li>
+                        <li><i class="fa-solid fa-check-circle" style="color: var(--accent-green)"></i> <strong>Homologation DR</strong> du service de détection, et des enclaves (collecte et consultation) sur le SI du commanditaire</li>
+                        <li><i class="fa-solid fa-check-circle" style="color: var(--accent-green)"></i> Formalisation d'une <strong>convention de service</strong> entre les parties prenantes</li>
+                        <li><i class="fa-solid fa-check-circle" style="color: var(--accent-green)"></i> Utilisation de <strong>personnels compétents</strong>, établissement d'un plan de formation</li>
+                        <li><i class="fa-solid fa-check-circle" style="color: var(--accent-green)"></i> Capacité à <strong>surveiller le service de surveillance</strong></li>
+                        <li><i class="fa-solid fa-check-circle" style="color: var(--accent-green)"></i> <strong>Pas de visibilité</strong> par le commanditaire sur les outils du prestataire</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section style="margin-top: 3rem;">
+                <h2><i class="fa-solid fa-diagram-project"></i> Architecture Type PDIS</h2>
+                
+                <div style="background: #000; padding: 2rem; border-radius: 12px; border: 1px solid var(--border-color);">
+                    <div style="text-align: center; color: var(--accent-blue); font-family: 'JetBrains Mono', monospace; font-size: 0.9rem;">
+                        <div style="margin-bottom: 2rem;">
+                            <div style="display: inline-block; padding: 1rem 2rem; background: rgba(56, 189, 248, 0.1); border: 2px solid var(--accent-blue); border-radius: 8px;">
+                                <i class="fa-solid fa-building"></i> SI COMMANDITAIRE
+                            </div>
+                        </div>
+
+                        <div style="margin: 1rem 0; color: var(--accent-green);">
+                            <i class="fa-solid fa-arrow-down"></i> Collecte
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 2rem 0;">
+                            <div style="padding: 1rem; background: rgba(192, 132, 252, 0.1); border: 2px solid var(--accent-purple); border-radius: 8px;">
+                                <i class="fa-solid fa-database"></i><br>ENCLAVE<br>COLLECTE
+                            </div>
+                            <div style="padding: 1rem; background: rgba(74, 222, 128, 0.1); border: 2px solid var(--accent-green); border-radius: 8px;">
+                                <i class="fa-solid fa-eye"></i><br>ENCLAVE<br>CONSULTATION
+                            </div>
+                            <div style="padding: 1rem; background: rgba(251, 146, 60, 0.1); border: 2px solid var(--accent-orange); border-radius: 8px;">
+                                <i class="fa-solid fa-exchange-alt"></i><br>ZONE<br>ÉCHANGE
+                            </div>
+                        </div>
+
+                        <div style="margin: 1rem 0; color: var(--accent-green);">
+                            <i class="fa-solid fa-arrow-down"></i> Traitement
+                        </div>
+
+                        <div style="display: inline-block; padding: 1.5rem 3rem; background: rgba(248, 113, 113, 0.1); border: 2px solid var(--accent-red); border-radius: 8px; margin: 1rem;">
+                            <i class="fa-solid fa-shield-halved"></i> SOC PDIS<br>
+                            <small>(Analyse & Corrélation)</small>
+                        </div>
+
+                        <div style="margin: 1rem 0; color: var(--accent-green);">
+                            <i class="fa-solid fa-arrow-down"></i> Notification
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+                            <div style="padding: 1rem; background: rgba(56, 189, 248, 0.1); border: 2px solid var(--accent-blue); border-radius: 8px;">
+                                <i class="fa-solid fa-building-user"></i><br>COMMANDITAIRE
+                            </div>
+                            <div style="padding: 1rem; background: rgba(250, 204, 21, 0.1); border: 2px solid var(--accent-yellow); border-radius: 8px;">
+                                <i class="fa-solid fa-landmark"></i><br>ANSSI
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-box" style="margin-top: 2rem;">
+                    <strong><i class="fa-solid fa-lightbulb"></i> Points clés de l'architecture :</strong>
+                    <ul style="margin-top: 10px; padding-left: 20px;">
+                        <li>Séparation stricte entre les zones de confiance</li>
+                        <li>Flux unidirectionnel de collecte vers analyse</li>
+                        <li>Double notification : commanditaire + ANSSI</li>
+                        <li>Cloisonnement fort pour la sécurité</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section style="margin-top: 3rem;">
+                <h2><i class="fa-solid fa-store"></i> Acteurs du Marché PDIS</h2>
+                
                 <div class="card" style="background: linear-gradient(145deg, #1e293b, #243045);">
-                    <h3 style="color: var(--accent-yellow);">MDR</h3>
-                    <p><strong>Managed Detection and Response</strong></p>
-                    <p>C'est un EDR géré par une entreprise externe. Externalisation de la surveillance et de la réponse.</p>
+                    <h3 style="color: var(--accent-green); margin-bottom: 1.5rem;"><i class="fa-solid fa-certificate"></i> Produits et Services Qualifiés par l'ANSSI</h3>
+                    
+                    <p style="margin-bottom: 1rem;">L'ANSSI maintient une liste officielle des prestataires PDIS et PRIS qualifiés. Ces acteurs ont démontré leur conformité aux exigences du référentiel.</p>
+                    
+                    <div class="alert-box" style="border-color: var(--accent-blue); background: rgba(56, 189, 248, 0.05); color: var(--accent-blue);">
+                        <i class="fa-solid fa-info-circle"></i> Consultez la liste officielle sur le site de l'ANSSI pour connaître les prestataires certifiés et les solutions qualifiées.
+                    </div>
+                </div>
+            </section>
+
+            <section style="margin-top: 3rem;">
+                <h2><i class="fa-solid fa-scale-balanced"></i> Rappel RGPD</h2>
+                
+                <div class="card" style="border-left: 4px solid var(--accent-yellow);">
+                    <div style="display: flex; align-items: start; gap: 1rem;">
+                        <div style="font-size: 3rem; color: var(--accent-yellow);"><i class="fa-solid fa-user-shield"></i></div>
+                        <div>
+                            <h3 style="color: var(--accent-yellow);">Protection des Données Personnelles</h3>
+                            <p style="margin-top: 1rem;">Les activités de détection et de réponse aux incidents impliquent souvent la collecte et le traitement de données personnelles. Le SOC PDIS doit :</p>
+                            <ul style="margin-top: 1rem; padding-left: 20px;">
+                                <li><strong>Respecter le RGPD</strong> dans toutes ses opérations</li>
+                                <li><strong>Minimiser</strong> la collecte de données personnelles</li>
+                                <li><strong>Garantir</strong> la confidentialité et la sécurité des données traitées</li>
+                                <li><strong>Documenter</strong> les traitements mis en œuvre</li>
+                                <li><strong>Informer</strong> les personnes concernées selon les obligations légales</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- PAGE 5: Définitions -->
+        <div id="page5" class="page">
+            <section>
+                <h2><i class="fa-solid fa-book"></i> Définitions & Concepts</h2>
+                
+                <div class="grid-2">
+                    <div class="card" style="background: linear-gradient(145deg, #1e293b, #243045);">
+                        <h3 style="color: var(--accent-yellow);">MDR</h3>
+                        <span class="tag tag-orange">Managed Detection and Response</span>
+                        <p><strong>Managed Detection and Response</strong></p>
+                        <p>C'est un EDR géré par une entreprise externe. Externalisation de la surveillance et de la réponse.</p>
+                        <hr style="border-color:#333; margin:15px 0">
+                        <p style="font-size: 0.9rem;"><strong>Avantages :</strong> Expertise 24/7, infrastructure gérée, réponse rapide aux incidents.</p>
+                    </div>
+
+                    <div class="card">
+                        <h3 style="color: var(--accent-purple);">Évolution SIEM</h3>
+                        <ul style="margin-top:10px;">
+                            <li style="margin-bottom: 15px;">
+                                <strong style="color: var(--text-primary);">SIM :</strong> Security Information Management.<br>
+                                <small>Gestion, stockage et conformité (Long terme).</small>
+                            </li>
+                            <li style="margin-bottom: 15px;">
+                                <strong style="color: var(--text-primary);">SEM :</strong> Security Event Management.<br>
+                                <small>Gestion des événements en temps réel (Monitoring).</small>
+                            </li>
+                            <li>
+                                <strong style="color: var(--accent-purple);">SIEM :</strong> Fusion des deux (SIM + SEM).<br>
+                                <small>Analyse en temps réel + conservation long terme.</small>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <h3 style="color: var(--accent-blue);">OIV</h3>
+                        <span class="tag tag-blue">Opérateur d'Importance Vitale</span>
+                        <p>Organismes publics ou privés exploitant des établissements ou utilisant des installations dont l'indisponibilité risquerait de diminuer de façon importante le potentiel de guerre ou économique, la sécurité ou la capacité de survie de la Nation.</p>
+                        <p style="margin-top: 10px;"><strong>Exemples :</strong> Énergie, transport, santé, eau, télécoms, finance...</p>
+                    </div>
+
+                    <div class="card">
+                        <h3 style="color: var(--accent-green);">OSE</h3>
+                        <span class="tag tag-green">Opérateur de Services Essentiels</span>
+                        <p>Définis par la directive européenne NIS (Network and Information Security). Opérateurs dont les services sont essentiels au maintien d'activités sociétales et/ou économiques critiques.</p>
+                        <p style="margin-top: 10px;"><strong>Catégories :</strong> Secteurs similaires aux OIV avec périmètre européen.</p>
+                    </div>
+
+                    <div class="card">
+                        <h3 style="color: var(--accent-red);">SIIV</h3>
+                        <span class="tag tag-red">Système d'Information d'Importance Vitale</span>
+                        <p>Systèmes d'information dont la sécurité et le bon fonctionnement sont essentiels à la continuité des services et activités des OIV.</p>
+                        <p style="margin-top: 10px;"><strong>Obligation :</strong> Recours à un PDIS qualifié.</p>
+                    </div>
+
+                    <div class="card">
+                        <h3 style="color: var(--accent-purple);">CTI</h3>
+                        <span class="tag tag-purple">Cyber Threat Intelligence</span>
+                        <p><strong>Cyber Threat Intelligence</strong></p>
+                        <p>Renseignement sur les menaces cyber : informations collectées, traitées et analysées pour comprendre les motivations, cibles et comportements des attaquants.</p>
+                        <ul style="margin-top: 10px; font-size: 0.85rem; padding-left: 20px;">
+                            <li><strong>IoC :</strong> Indicators of Compromise (hash, IP, domaines malveillants)</li>
+                            <li><strong>TTPs :</strong> Tactics, Techniques and Procedures</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <h3 style="color: var(--accent-orange);">EDR</h3>
+                        <span class="tag tag-orange">Endpoint Detection and Response</span>
+                        <p>Solution de sécurité qui surveille en continu les endpoints (postes de travail, serveurs) pour détecter et répondre aux menaces avancées.</p>
+                        <p style="margin-top: 10px;"><strong>Capacités :</strong> Détection comportementale, analyse forensique, réponse automatisée, chasse aux menaces.</p>
+                    </div>
+
+                    <div class="card">
+                        <h3 style="color: var(--accent-blue);">Homologation</h3>
+                        <p>Processus visant à attester qu'un système d'information est protégé conformément aux objectifs de sécurité fixés.</p>
+                        <p style="margin-top: 10px;"><strong>Homologation DR :</strong> Dossier comprenant l'analyse de risques, les mesures de sécurité, et la décision d'acceptation des risques résiduels.</p>
+                    </div>
+
+                    <div class="card">
+                        <h3 style="color: var(--accent-green);">PSSI</h3>
+                        <span class="tag tag-green">Politique de Sécurité des SI</span>
+                        <p>Document de référence définissant les règles et les mesures relatives à la sécurité des systèmes d'information de l'organisation.</p>
+                        <p style="margin-top: 10px;"><strong>Contenu :</strong> Objectifs, organisation, responsabilités, règles techniques et organisationnelles.</p>
+                    </div>
+
+                    <div class="card">
+                        <h3 style="color: var(--accent-purple);">Playbook</h3>
+                        <p>Ensemble de procédures documentées et automatisables définissant les actions à mener en réponse à un type d'incident ou d'alerte spécifique.</p>
+                        <p style="margin-top: 10px;"><strong>Utilisation :</strong> Automatisation des réponses dans les solutions SOAR.</p>
+                    </div>
                 </div>
 
-                <div class="card">
-                    <h3 style="color: var(--accent-purple);">Évolution SIEM</h3>
-                    <ul style="margin-top:10px;">
-                        <li style="margin-bottom: 10px;">
-                            <strong style="color: var(--text-primary);">SIM :</strong> Security Information Management.<br>
-                            <small>Gestion, stockage et conformité (Long terme).</small>
-                        </li>
-                        <li style="margin-bottom: 10px;">
-                            <strong style="color: var(--text-primary);">SEM :</strong> Security Event Management.<br>
-                            <small>Gestion des événements en temps réel (Monitoring).</small>
-                        </li>
-                        <li>
-                            <strong style="color: var(--accent-purple);">SIEM :</strong> Fusion des deux (SIM + SEM).
-                        </li>
-                    </ul>
+                <div style="margin-top: 3rem; padding: 2rem; background: rgba(56, 189, 248, 0.05); border-radius: 12px; border-left: 4px solid var(--accent-blue);">
+                    <h3><i class="fa-solid fa-layer-group"></i> Architecture Globale d'un SOC</h3>
+                    <div class="workflow" style="background: var(--card-bg); text-align: center;">
+                        Sources (Endpoints, Network, Cloud) <i class="fa-solid fa-arrow-right"></i> 
+                        Collecte (Agents, Sondes) <i class="fa-solid fa-arrow-right"></i> 
+                        SIEM (Corrélation) <i class="fa-solid fa-arrow-right"></i> 
+                        SOAR (Orchestration) <i class="fa-solid fa-arrow-right"></i> 
+                        Analystes SOC <i class="fa-solid fa-arrow-right"></i> 
+                        Réponse & Remédiation
+                    </div>
                 </div>
-            </div>
-        </section>
+            </section>
+        </div>
 
     </main>
 
     <footer>
         <p>&copy; 2025 - CyberSec Notes - Synthèse de cours - Titouan GIBERT</p>
     </footer>
+
+    <script>
+        function showPage(pageId) {
+            // Hide all pages
+            const pages = document.querySelectorAll('.page');
+            pages.forEach(page => page.classList.remove('active'));
+            
+            // Show selected page
+            const selectedPage = document.getElementById(pageId);
+            if (selectedPage) {
+                selectedPage.classList.add('active');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        // Optional: Handle browser back/forward buttons
+        window.addEventListener('hashchange', function() {
+            const hash = window.location.hash.substring(1);
+            if (hash) {
+                showPage(hash);
+            }
+        });
+
+        // Optional: Set page from URL hash on load
+        document.addEventListener('DOMContentLoaded', function() {
+            const hash = window.location.hash.substring(1);
+            if (hash) {
+                showPage(hash);
+            }
+        });
+    </script>
 
 </body>
 </html>
