@@ -1,442 +1,1521 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CyberSec - Architecture & Défense</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SENTINELLE — Console de supervision cyber</title>
+<style>
+/* ============================================================
+   SENTINELLE — feuille de style unique
+   Substrat ardoise froide, instruments en teal glacé,
+   signalétique ambre / corail. Tout en chasse fixe.
+   ============================================================ */
+:root{
+  --substrate:#070b11;
+  --substrate-2:#0a1017;
+  --panel:#0d141d;
+  --panel-2:#101a24;
+  --rule:rgba(120,178,200,.16);
+  --rule-soft:rgba(120,178,200,.08);
+  --txt:#d6e6ee;
+  --dim:#7e9aa9;
+  --faint:#4d6675;
+  --teal:#2fd6c4;
+  --azure:#4f9dff;
+  --amber:#ffb020;
+  --coral:#ff5468;
+  --mint:#49e08b;
+  --violet:#9d7bff;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", "JetBrains Mono", "Cascadia Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --pad: 12px;
+  --cut: 10px;
+}
 
-    <style>
-        :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
-            --accent-blue: #38bdf8;
-            --accent-green: #4ade80;
-            --accent-red: #f87171;
-            --accent-purple: #c084fc;
-            --accent-yellow: #facc15;
-            --border-color: #334155;
-        }
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  background:
+    radial-gradient(1200px 700px at 62% -10%, rgba(47,214,196,.07), transparent 60%),
+    radial-gradient(900px 600px at 5% 110%, rgba(79,157,255,.06), transparent 60%),
+    var(--substrate);
+  color:var(--txt);
+  font-family:var(--mono);
+  font-size:13px;
+  line-height:1.45;
+  overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+}
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+/* trame d'instrument : grille millimétrée très discrète */
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:
+    linear-gradient(var(--rule-soft) 1px, transparent 1px),
+    linear-gradient(90deg, var(--rule-soft) 1px, transparent 1px);
+  background-size:64px 64px;
+  mask-image:radial-gradient(circle at 50% 40%, #000 30%, transparent 88%);
+}
+/* voile de balayage */
+body::after{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:60;
+  background:repeating-linear-gradient(to bottom, rgba(0,0,0,.16) 0 1px, transparent 1px 3px);
+  opacity:.35;mix-blend-mode:multiply;
+}
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-primary);
-            line-height: 1.6;
-        }
+/* ---------- micro-typographie ---------- */
+.lbl{
+  font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--faint);font-weight:600;
+}
+.num{font-variant-numeric:tabular-nums;letter-spacing:.02em}
 
-        /* --- Header --- */
-        header {
-            background: rgba(15, 23, 42, 0.95);
-            border-bottom: 1px solid var(--border-color);
-            padding: 1.5rem 0;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            backdrop-filter: blur(10px);
-        }
+/* ---------- panneaux à coins coupés ---------- */
+.panel{
+  position:relative;
+  background:linear-gradient(180deg, rgba(16,26,36,.82), rgba(10,16,23,.86));
+  border:1px solid var(--rule);
+  clip-path:polygon(var(--cut) 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%, 0 var(--cut));
+  display:flex;flex-direction:column;min-height:0;min-width:0;
+}
+.panel > .head{
+  flex:0 0 auto;display:flex;align-items:center;gap:8px;
+  padding:8px 10px 7px;border-bottom:1px solid var(--rule-soft);
+}
+.panel > .head .tick{width:3px;height:11px;background:var(--teal);box-shadow:0 0 8px var(--teal)}
+.panel > .body{flex:1 1 auto;min-height:0;position:relative}
 
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
+/* ---------- charpente ---------- */
+#app{
+  position:relative;z-index:1;height:100dvh;
+  display:grid;grid-template-rows:auto minmax(0,1fr) auto;
+  gap:10px;padding:10px;
+  opacity:0;transition:opacity .7s ease .1s;
+}
+#app.on{opacity:1}
 
-        nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+/* ================= BANDEAU ================= */
+header{
+  display:grid;grid-template-columns:auto 1fr auto;align-items:stretch;gap:14px;
+  border:1px solid var(--rule);
+  background:linear-gradient(90deg, rgba(47,214,196,.07), rgba(10,16,23,.7) 30%);
+  clip-path:polygon(var(--cut) 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%, 0 var(--cut));
+  padding:9px 14px;
+}
+.brand{display:flex;align-items:center;gap:11px}
+.sigil{width:26px;height:26px;position:relative;flex:0 0 auto}
+.sigil i{position:absolute;inset:0;border:1px solid var(--teal);border-radius:50%;opacity:.55}
+.sigil i:nth-child(2){inset:5px;border-color:var(--azure);opacity:.45;animation:spin 9s linear infinite}
+.sigil i:nth-child(3){inset:10px;background:var(--teal);border:0;border-radius:50%;box-shadow:0 0 12px var(--teal)}
+.sigil i:nth-child(2)::after{content:"";position:absolute;top:-2px;left:50%;width:3px;height:3px;background:var(--azure);border-radius:50%}
+@keyframes spin{to{transform:rotate(360deg)}}
+.brand h1{
+  margin:0;font-size:15px;font-weight:700;letter-spacing:.34em;color:var(--txt);
+}
+.brand .sub{font-size:9.5px;letter-spacing:.2em;color:var(--faint);text-transform:uppercase;margin-top:1px}
 
-        .logo {
-            font-weight: 700;
-            font-size: 1.5rem;
-            color: var(--accent-blue);
-            font-family: 'JetBrains Mono', monospace;
-        }
+.gauges{display:flex;align-items:center;gap:0;justify-content:center;flex-wrap:wrap}
+.gauge{padding:0 16px;border-left:1px solid var(--rule-soft);min-width:104px}
+.gauge:first-child{border-left:0}
+.gauge .v{font-size:19px;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums}
+.gauge .bar{height:2px;background:rgba(255,255,255,.07);margin-top:5px;overflow:hidden}
+.gauge .bar i{display:block;height:100%;transition:width .5s ease, background .5s ease}
 
-        .nav-links a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            margin-left: 20px;
-            font-size: 0.9rem;
-            transition: color 0.3s;
-        }
+.status{display:flex;align-items:center;gap:12px}
+.threatlvl{
+  display:flex;align-items:center;gap:9px;padding:6px 12px;
+  border:1px solid var(--rule);background:rgba(0,0,0,.35);
+}
+.threatlvl .dot{width:8px;height:8px;border-radius:50%;background:var(--mint);box-shadow:0 0 10px currentColor;color:var(--mint)}
+.threatlvl.l2 .dot{background:var(--azure);color:var(--azure)}
+.threatlvl.l3 .dot{background:var(--amber);color:var(--amber)}
+.threatlvl.l4 .dot,.threatlvl.l5 .dot{background:var(--coral);color:var(--coral);animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:.15}}
+.threatlvl .txt{font-size:11px;letter-spacing:.16em;font-weight:700}
+.clock{text-align:right}
+.clock .t{font-size:17px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:.06em}
 
-        .nav-links a:hover {
-            color: var(--accent-blue);
-        }
+/* ================= COLONNES ================= */
+main{
+  display:grid;
+  grid-template-columns:minmax(250px,300px) minmax(0,1fr) minmax(280px,344px);
+  gap:10px;min-height:0;
+}
+.col{display:grid;gap:10px;min-height:0;min-width:0}
+.col.left{grid-template-rows:minmax(0,1.15fr) minmax(0,1fr)}
+.col.center{grid-template-rows:minmax(0,1fr) 118px}
+.col.right{grid-template-rows:minmax(0,.9fr) minmax(0,1.1fr)}
 
-        /* --- Sections --- */
-        section {
-            padding: 4rem 0;
-            border-bottom: 1px solid var(--border-color);
-        }
+canvas{display:block;width:100%;height:100%}
 
-        h2 {
-            font-size: 2rem;
-            margin-bottom: 2rem;
-            color: var(--text-primary);
-            border-left: 4px solid var(--accent-blue);
-            padding-left: 15px;
-        }
+/* ---------- carte des hôtes ---------- */
+#hostlist{position:absolute;inset:0;overflow:auto;padding:4px 4px 8px}
+#hostlist::-webkit-scrollbar,#logs::-webkit-scrollbar,#incidents::-webkit-scrollbar{width:7px}
+#hostlist::-webkit-scrollbar-thumb,#logs::-webkit-scrollbar-thumb,#incidents::-webkit-scrollbar-thumb{background:rgba(120,178,200,.18)}
+.seggroup{margin:6px 4px 10px}
+.seggroup .sh{display:flex;align-items:center;gap:6px;margin-bottom:5px}
+.seggroup .sh .ln{flex:1;height:1px;background:var(--rule-soft)}
+.hrow{
+  display:grid;grid-template-columns:9px 1fr auto;align-items:center;gap:8px;
+  padding:4px 7px;cursor:pointer;border:1px solid transparent;
+  transition:background .15s, border-color .15s;
+}
+.hrow:hover{background:rgba(47,214,196,.06);border-color:var(--rule-soft)}
+.hrow.sel{background:rgba(47,214,196,.11);border-color:rgba(47,214,196,.4)}
+.hrow .pip{width:7px;height:7px;border-radius:50%;background:var(--mint);box-shadow:0 0 7px currentColor;color:var(--mint)}
+.hrow .nm{font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--txt)}
+.hrow .st{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
+.s-suspect .pip{background:var(--amber);color:var(--amber)}
+.s-suspect .st{color:var(--amber)}
+.s-compromis .pip{background:var(--coral);color:var(--coral);animation:blink .8s steps(2) infinite}
+.s-compromis .st{color:var(--coral)}
+.s-isole .pip{background:var(--faint);color:var(--faint);box-shadow:none}
+.s-isole .nm{color:var(--faint);text-decoration:line-through;text-decoration-color:rgba(255,255,255,.25)}
+.s-remede .pip{background:var(--azure);color:var(--azure)}
+.s-remede .st{color:var(--azure)}
 
-        h3 {
-            font-size: 1.3rem;
-            margin-bottom: 1rem;
-            color: var(--text-primary);
-        }
+/* ---------- fiche hôte ---------- */
+#detail{position:absolute;inset:0;overflow:hidden}
+.kv{display:grid;grid-template-columns:82px 1fr;gap:3px 10px;margin:8px 0 12px}
+.kv .k{font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);padding-top:2px}
+.kv .v{font-size:11.5px;color:var(--txt);word-break:break-word}
+.acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+button.act{
+  font-family:var(--mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;
+  padding:6px 11px;background:rgba(47,214,196,.09);color:var(--teal);
+  border:1px solid rgba(47,214,196,.36);cursor:pointer;transition:.15s;
+}
+button.act:hover{background:rgba(47,214,196,.2);box-shadow:0 0 14px rgba(47,214,196,.24)}
+button.act.warn{background:rgba(255,176,32,.09);color:var(--amber);border-color:rgba(255,176,32,.36)}
+button.act.warn:hover{background:rgba(255,176,32,.2);box-shadow:0 0 14px rgba(255,176,32,.22)}
+button.act.bad{background:rgba(255,84,104,.09);color:var(--coral);border-color:rgba(255,84,104,.36)}
+button.act.bad:hover{background:rgba(255,84,104,.2);box-shadow:0 0 14px rgba(255,84,104,.22)}
+button.act:disabled{opacity:.28;cursor:not-allowed;box-shadow:none}
+button.act:focus-visible,input:focus-visible,.hrow:focus-visible{outline:2px solid var(--azure);outline-offset:2px}
+.empty{color:var(--faint);font-size:11px;padding:18px 4px;line-height:1.7}
+.proc{font-size:10.5px;color:var(--dim);padding:3px 0;border-bottom:1px dashed var(--rule-soft);display:flex;gap:8px}
+.proc b{color:var(--coral);font-weight:600}
 
-        p, li {
-            color: var(--text-secondary);
-            margin-bottom: 0.8rem;
-        }
+/* ---------- incidents ---------- */
+#incidents{position:absolute;inset:0;overflow:auto;padding:6px}
+.inc{
+  border:1px solid var(--rule);background:rgba(0,0,0,.28);
+  padding:8px 9px;margin-bottom:7px;position:relative;overflow:hidden;
+  animation:slide .3s ease both;
+}
+@keyframes slide{from{opacity:0;transform:translateX(10px)}}
+.inc::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--amber)}
+.inc.crit::before{background:var(--coral)}
+.inc .t1{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.inc .actor{font-size:11.5px;font-weight:700;color:var(--txt)}
+.inc .mit{font-size:9px;letter-spacing:.1em;color:var(--faint)}
+.inc .t2{font-size:10.5px;color:var(--dim);margin:3px 0 6px}
+.inc .t2 b{color:var(--amber);font-weight:600}
+.inc.crit .t2 b{color:var(--coral)}
+.inc .prog{height:2px;background:rgba(255,255,255,.07);margin-bottom:7px}
+.inc .prog i{display:block;height:100%;background:var(--amber)}
+.inc.crit .prog i{background:var(--coral)}
+.inc .btns{display:flex;gap:5px}
+.inc button{
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;
+  padding:4px 8px;background:transparent;border:1px solid var(--rule);color:var(--dim);cursor:pointer;transition:.15s
+}
+.inc button:hover{color:var(--teal);border-color:rgba(47,214,196,.5);background:rgba(47,214,196,.08)}
 
-        ul {
-            list-style-type: none;
-        }
+/* ---------- journal ---------- */
+#logs{position:absolute;inset:0;overflow:auto;padding:6px 8px;font-size:10.5px;line-height:1.55}
+.le{display:grid;grid-template-columns:56px 40px 1fr;gap:8px;padding:1px 0;animation:fadein .25s ease both}
+@keyframes fadein{from{opacity:0}}
+.le .ts{color:var(--faint);font-variant-numeric:tabular-nums}
+.le .sv{font-size:9px;letter-spacing:.08em;padding-top:1px;font-weight:700}
+.le .ms{color:var(--dim);word-break:break-word}
+.le.info .sv{color:var(--azure)} .le.ok .sv{color:var(--mint)}
+.le.warn .sv{color:var(--amber)} .le.warn .ms{color:#c8d8e0}
+.le.crit .sv{color:var(--coral)} .le.crit .ms{color:#ffd9de}
+.le .ms b{color:var(--txt);font-weight:600}
 
-        /* --- Cards Grid --- */
-        .grid-2 {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-        }
+/* ---------- console ---------- */
+footer{
+  border:1px solid var(--rule);background:rgba(10,16,23,.8);
+  clip-path:polygon(var(--cut) 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%, 0 var(--cut));
+  display:flex;align-items:center;gap:10px;padding:0 14px;height:42px;
+}
+footer .ps{color:var(--teal);font-weight:700;font-size:12px;white-space:nowrap}
+footer input{
+  flex:1;background:transparent;border:0;outline:0;color:var(--txt);
+  font-family:var(--mono);font-size:12.5px;caret-color:var(--teal);min-width:60px;
+}
+footer input::placeholder{color:var(--faint)}
+.toggles{display:flex;gap:6px;align-items:center}
+.tg{
+  font-size:9px;letter-spacing:.13em;text-transform:uppercase;padding:5px 9px;cursor:pointer;
+  border:1px solid var(--rule);color:var(--faint);background:transparent;font-family:var(--mono);transition:.15s;white-space:nowrap
+}
+.tg[aria-pressed="true"]{color:var(--teal);border-color:rgba(47,214,196,.45);background:rgba(47,214,196,.1)}
+.tg:hover{color:var(--txt)}
 
-        .grid-3 {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-        }
+/* ---------- écran d'amorçage ---------- */
+#boot{
+  position:fixed;inset:0;z-index:100;background:var(--substrate);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;
+  font-size:12px;cursor:pointer;transition:opacity .6s ease;
+}
+#boot.off{opacity:0;pointer-events:none}
+#bootlines{width:min(560px,86vw);height:190px;color:var(--dim);font-size:11.5px;line-height:1.85}
+#bootlines b{color:var(--teal);font-weight:600}
+#bootlines .ok{color:var(--mint)}
+#boot .big{font-size:26px;letter-spacing:.44em;font-weight:700;color:var(--txt);text-indent:.44em}
+#boot .hint{color:var(--faint);font-size:10px;letter-spacing:.24em;text-transform:uppercase;animation:blink 1.6s ease-in-out infinite}
 
-        .grid-4 {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-        }
+/* ---------- bandeau de fuite ---------- */
+#flash{
+  position:fixed;left:0;right:0;top:0;z-index:70;pointer-events:none;
+  background:linear-gradient(180deg, rgba(255,84,104,.4), transparent);
+  height:120px;opacity:0;transition:opacity .35s;
+}
+#flash.on{opacity:1}
 
-        .card {
-            background-color: var(--card-bg);
-            padding: 2rem;
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-            transition: transform 0.2s, border-color 0.2s;
-            height: 100%;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-            border-color: var(--accent-blue);
-        }
-
-        .card-icon {
-            font-size: 2rem;
-            margin-bottom: 1rem;
-        }
-
-        /* --- Specific Styling --- */
-        .tag {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-        
-        .tag-blue { background: rgba(56, 189, 248, 0.2); color: var(--accent-blue); }
-        .tag-green { background: rgba(74, 222, 128, 0.2); color: var(--accent-green); }
-        .tag-red { background: rgba(248, 113, 113, 0.2); color: var(--accent-red); }
-        .tag-purple { background: rgba(192, 132, 252, 0.2); color: var(--accent-purple); }
-
-        .workflow {
-            font-family: 'JetBrains Mono', monospace;
-            background: #000;
-            padding: 1.2rem;
-            border-radius: 8px;
-            color: var(--accent-green);
-            text-align: center;
-            margin: 1.5rem 0;
-            border: 1px solid #333;
-            font-size: 0.9rem;
-        }
-
-        .price-box {
-            background: rgba(192, 132, 252, 0.05);
-            border: 1px solid var(--accent-purple);
-            padding: 1.5rem;
-            border-radius: 8px;
-            margin-top: 1rem;
-        }
-
-        .price-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 0.5rem;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.9rem;
-            color: var(--text-primary);
-        }
-
-        .alert-box {
-            margin-top: 1.5rem;
-            border: 1px solid var(--accent-red);
-            background: rgba(248, 113, 113, 0.05);
-            padding: 1rem;
-            border-radius: 8px;
-            color: var(--accent-red);
-            font-size: 0.9rem;
-        }
-
-        /* --- Footer --- */
-        footer {
-            text-align: center;
-            padding: 3rem 0;
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            border-top: 1px solid var(--border-color);
-        }
-
-        /* --- Responsive --- */
-        @media (max-width: 768px) {
-            h2 { font-size: 1.5rem; }
-            .nav-links { display: none; }
-        }
-    </style>
+@media (max-width:1180px){
+  main{grid-template-columns:1fr;grid-auto-rows:minmax(220px,auto);overflow:auto}
+  .col{grid-template-rows:none;grid-auto-rows:minmax(200px,auto)}
+  .col.center{order:-1}
+  #app{height:auto;min-height:100dvh;overflow:auto}
+  body{overflow:auto}
+  header{grid-template-columns:1fr;gap:10px}
+  .gauges{justify-content:flex-start}
+  .gauge{padding-left:0;border-left:0;padding-right:20px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.001s !important;transition-duration:.001s !important}
+}
+</style>
 </head>
 <body>
 
-    <header>
-        <div class="container">
-            <nav>
-                <div class="logo"><i class="fa-solid fa-shield-halved"></i> CyberNotes_</div>
-                <div class="nav-links">
-                    <a href="#cert-csirt">CERT/CSIRT</a>
-                    <a href="#elk">ELK</a>
-                    <a href="#soar">SOAR</a>
-                    <a href="#voc">VOC</a>
-                    <a href="#ids-ips">IDS/IPS</a>
-                    <a href="#definitions">Définitions</a>
-                </div>
-            </nav>
-        </div>
-    </header>
+<div id="flash"></div>
 
-    <main class="container">
+<div id="boot" role="button" tabindex="0" aria-label="Démarrer la console">
+  <div class="big">SENTINELLE</div>
+  <div id="bootlines"></div>
+  <div class="hint" id="boothint" style="visibility:hidden">Cliquez pour prendre le poste</div>
+</div>
 
-        <section id="cert-csirt">
-            <h2><i class="fa-solid fa-building-shield"></i> Organismes : CSIRT & CERT</h2>
-            <div class="grid-2">
-                <div class="card" style="border-top: 4px solid var(--accent-green);">
-                    <div class="card-icon" style="color: var(--accent-green);"><i class="fa-solid fa-bullhorn"></i></div>
-                    <h3>CERT</h3>
-                    <span class="tag tag-green">Alerte & Sensibilisation</span>
-                    <p>Focalisé sur la veille, le traitement des alertes de sécurité et la centralisation.</p>
-                    
-                    <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; margin-top: 15px;">
-                        <strong style="color: var(--text-primary);">CERT-FR (Gouvernemental)</strong>
-                        <ul style="margin-top: 5px; font-size: 0.85rem;">
-                            <li><i class="fa-solid fa-check" style="color: var(--accent-green)"></i> Organismes Publics / Ministères</li>
-                            <li><i class="fa-solid fa-check" style="color: var(--accent-green)"></i> OIV (Opérateurs d'Importance Vitale)</li>
-                            <li><i class="fa-solid fa-check" style="color: var(--accent-green)"></i> OSE (Opérateurs de Services Essentiels)</li>
-                        </ul>
-                    </div>
-                </div>
+<div id="app" aria-hidden="true">
 
-                <div class="card" style="border-top: 4px solid var(--accent-blue);">
-                    <div class="card-icon" style="color: var(--accent-blue);"><i class="fa-solid fa-truck-medical"></i></div>
-                    <h3>CSIRT</h3>
-                    <span class="tag tag-blue">Réponse à incident</span>
-                    <p>Aide opérationnelle ("Pompiers") pour la réponse, le confinement et la remédiation.</p>
-                    
-                    <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; margin-top: 15px;">
-                        <strong style="color: var(--text-primary);">CSIRT Territoriaux (Régionaux)</strong>
-                        <ul style="margin-top: 5px; font-size: 0.85rem;">
-                            <li><i class="fa-solid fa-map-location-dot" style="color: var(--accent-blue)"></i> <strong>14 centres</strong> (1 par région)</li>
-                            <li><i class="fa-solid fa-users" style="color: var(--accent-blue)"></i> Cible : PME, ETI, Collectivités</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            
-            <div style="margin-top: 2rem; background: rgba(56, 189, 248, 0.1); padding: 1rem; border-radius: 8px; border-left: 4px solid var(--accent-blue);">
-                <strong><i class="fa-solid fa-link"></i> Intérêts pour le SOC :</strong>
-                <span style="color: var(--text-secondary); display: block; margin-top: 5px;">
-                    1. Suivi des incidents & réception de CTI (IoC).<br>
-                    2. Mise en relation avec des experts cyber.<br>
-                    3. Prévention et anticipation des menaces.
-                </span>
-            </div>
-        </section>
+  <header>
+    <div class="brand">
+      <div class="sigil"><i></i><i></i><i></i></div>
+      <div>
+        <h1>SENTINELLE</h1>
+        <div class="sub">Centre de supervision — poste analyste 01</div>
+      </div>
+    </div>
 
-        <section id="elk">
-            <h2><i class="fa-solid fa-layer-group"></i> Projet ELK (Elastic Stack)</h2>
-            <p>Solution (SaaS, PaaS ou On-premise) pour regrouper, traiter et stocker les logs de multiples plateformes.</p>
+    <div class="gauges">
+      <div class="gauge">
+        <div class="lbl">Intégrité données</div>
+        <div class="v num" id="g-int" style="color:var(--mint)">100%</div>
+        <div class="bar"><i id="b-int" style="width:100%;background:var(--mint)"></i></div>
+      </div>
+      <div class="gauge">
+        <div class="lbl">Disponibilité</div>
+        <div class="v num" id="g-dis" style="color:var(--teal)">100%</div>
+        <div class="bar"><i id="b-dis" style="width:100%;background:var(--teal)"></i></div>
+      </div>
+      <div class="gauge">
+        <div class="lbl">Neutralisées</div>
+        <div class="v num" id="g-neu" style="color:var(--azure)">0</div>
+        <div class="bar"><i style="width:100%;background:rgba(79,157,255,.3)"></i></div>
+      </div>
+      <div class="gauge">
+        <div class="lbl">Fuites</div>
+        <div class="v num" id="g-fui" style="color:var(--coral)">0</div>
+        <div class="bar"><i style="width:100%;background:rgba(255,84,104,.25)"></i></div>
+      </div>
+      <div class="gauge">
+        <div class="lbl">Vague</div>
+        <div class="v num" id="g-vag">1</div>
+        <div class="bar"><i id="b-vag" style="width:0%;background:var(--violet)"></i></div>
+      </div>
+    </div>
 
-            <div class="workflow">
-                <span style="color:#fff">Flux :</span> Beats <i class="fa-solid fa-arrow-right"></i> Logstash <i class="fa-solid fa-arrow-right"></i> Elasticsearch <i class="fa-solid fa-arrow-right"></i> Kibana
-            </div>
+    <div class="status">
+      <div class="threatlvl" id="tl"><span class="dot"></span><span class="txt" id="tl-txt">NIVEAU VERT</span></div>
+      <div class="clock">
+        <div class="t num" id="clock">00:00:00</div>
+        <div class="lbl" id="uptime">Session 00:00</div>
+      </div>
+    </div>
+  </header>
 
-            <div class="grid-4">
-                <div class="card">
-                    <h4 style="color:var(--accent-blue)">1. Beats</h4>
-                    <small>Collecte</small>
-                    <hr style="border-color:#333; margin:10px 0">
-                    <p style="font-size: 0.85rem;">Agents légers sur les machines (Filebeat, Metricbeat). Envoient les données.</p>
-                </div>
-                <div class="card">
-                    <h4 style="color:var(--accent-purple)">2. Logstash</h4>
-                    <small>Traitement (ETL)</small>
-                    <hr style="border-color:#333; margin:10px 0">
-                    <p style="font-size: 0.85rem;">Ingestion, transformation, parsing et enrichissement des logs.</p>
-                </div>
-                <div class="card">
-                    <h4 style="color:var(--accent-green)">3. Elasticsearch</h4>
-                    <small>Stockage</small>
-                    <hr style="border-color:#333; margin:10px 0">
-                    <p style="font-size: 0.85rem;">Moteur de recherche et d'analyse. Indexe les données.</p>
-                </div>
-                <div class="card">
-                    <h4 style="color:var(--accent-red)">4. Kibana</h4>
-                    <small>Visualisation</small>
-                    <hr style="border-color:#333; margin:10px 0">
-                    <p style="font-size: 0.85rem;">Interface graphique. Dashboards, exploration.</p>
-                </div>
-            </div>
-        </section>
+  <main>
+    <!-- ================= GAUCHE ================= -->
+    <div class="col left">
+      <section class="panel">
+        <div class="head"><span class="tick"></span><span class="lbl">Topologie — 4 segments</span>
+          <span class="lbl" style="margin-left:auto;color:var(--dim)" id="topo-count">—</span></div>
+        <div class="body"><canvas id="topo"></canvas></div>
+      </section>
+      <section class="panel">
+        <div class="head"><span class="tick" style="background:var(--azure);box-shadow:0 0 8px var(--azure)"></span><span class="lbl">Parc — état des hôtes</span></div>
+        <div class="body"><div id="hostlist"></div></div>
+      </section>
+    </div>
 
-        <section id="soar">
-            <h2><i class="fa-solid fa-robot"></i> SOAR</h2>
-            <span class="tag tag-purple">SIEM Évolué</span>
-            <p><strong>Security Orchestration, Automation and Response</strong>. Solution pour orchestrer les outils et automatiser.</p>
-            
-            <div class="grid-2">
-                <div>
-                    <h3><i class="fa-solid fa-gears"></i> Principe Technique</h3>
-                    <ul style="padding-left: 20px; color: var(--text-secondary);">
-                        <li><strong>1. Collecte & Analyse :</strong> Récupère les logs/alertes (SIEM, EDR, AV).</li>
-                        <li><strong>2. Intégration :</strong> Connecte des outils hétérogènes.</li>
-                        <li><strong>3. Orchestration :</strong> Automatise les actions via des playbooks.</li>
-                    </ul>
-                    <p style="margin-top:15px; font-style: italic;">"Analyse préliminaire automatisée."</p>
-                </div>
-                
-                <div>
-                    <div class="price-box">
-                        <h4 style="color: var(--accent-purple); margin-bottom: 15px;"><i class="fa-solid fa-coins"></i> Coûts Projet (Estimations)</h4>
-                        <div class="price-item">
-                            <span>Licence</span>
-                            <span>5 000€ - 100 000€</span>
-                        </div>
-                        <div class="price-item">
-                            <span>Infrastructure</span>
-                            <span>10 000€ - 50 000€</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+    <!-- ================= CENTRE ================= -->
+    <div class="col center">
+      <section class="panel">
+        <div class="head"><span class="tick"></span><span class="lbl">Origines des flux hostiles — projection orthodromique</span>
+          <span class="lbl" style="margin-left:auto;color:var(--dim)" id="globe-info">—</span></div>
+        <div class="body"><canvas id="globe"></canvas></div>
+      </section>
+      <section class="panel">
+        <div class="head"><span class="tick" style="background:var(--amber);box-shadow:0 0 8px var(--amber)"></span><span class="lbl">Débit périmètre</span>
+          <span class="lbl" style="margin-left:auto;color:var(--dim)" id="chart-info">—</span></div>
+        <div class="body"><canvas id="chart"></canvas></div>
+      </section>
+    </div>
 
-        <section id="voc">
-            <h2><i class="fa-solid fa-magnifying-glass-chart"></i> VOC</h2>
-            <span class="tag tag-red">Approche Offensive</span>
-            <p><strong>Vulnerability Operation Center</strong>. Recherche de failles <em>avant</em> l'attaque.</p>
-            
-            <div class="grid-3">
-                <div class="card">
-                    <h3>Fonctionnement</h3>
-                    <p>Scans réguliers des machines, des services et des IPs.</p>
-                </div>
-                <div class="card">
-                    <h3>Organisation</h3>
-                    <p>Le VOC peut être :</p>
-                    <ul style="font-size: 0.85rem; padding-left: 15px;">
-                        <li>Une équipe dédiée</li>
-                        <li>Une fonction du métier</li>
-                        <li>Une plateforme support</li>
-                    </ul>
-                </div>
-                <div class="card" style="border-color: var(--accent-red);">
-                    <h3 style="color: var(--accent-red);">Vs SOC</h3>
-                    <p><strong>SOC :</strong> Défensif (Temps réel)</p>
-                    <p><strong>VOC :</strong> Offensif (Préventif)</p>
-                </div>
-            </div>
-        </section>
+    <!-- ================= DROITE ================= -->
+    <div class="col right">
+      <section class="panel">
+        <div class="head"><span class="tick" style="background:var(--coral);box-shadow:0 0 8px var(--coral)"></span><span class="lbl">Incidents ouverts</span>
+          <span class="lbl" style="margin-left:auto;color:var(--dim)" id="inc-count">0</span></div>
+        <div class="body"><div id="incidents"><div class="empty">Aucun incident ouvert. Le périmètre est calme.</div></div></div>
+      </section>
+      <section class="panel">
+        <div class="head"><span class="tick" style="background:var(--violet);box-shadow:0 0 8px var(--violet)"></span><span class="lbl">Journal corrélé</span>
+          <span class="lbl" style="margin-left:auto;color:var(--dim)" id="log-count">0 évts</span></div>
+        <div class="body"><div id="logs"></div></div>
+      </section>
+    </div>
+  </main>
 
-        <section id="ids-ips">
-            <h2><i class="fa-solid fa-network-wired"></i> IDS & IPS</h2>
-            <div class="workflow" style="background: var(--card-bg); text-align: left; border:none;">
-                <i class="fa-solid fa-sitemap"></i> <strong>Chaine d'intégration :</strong> Sonde (IDS/IPS) <i class="fa-solid fa-arrow-right"></i> SIEM (Corrélation) <i class="fa-solid fa-arrow-right"></i> SOC (Analyse)
-            </div>
+  <!-- ================= CONSOLE ================= -->
+  <footer>
+    <span class="ps">analyste@sentinelle:~$</span>
+    <input id="cmd" autocomplete="off" spellcheck="false" placeholder="tapez « aide » — ou / pour venir ici depuis n'importe où">
+    <div class="toggles">
+      <button class="tg" id="tg-auto" aria-pressed="false">Confinement auto</button>
+      <button class="tg" id="tg-snd" aria-pressed="true">Son</button>
+      <button class="tg" id="tg-pause" aria-pressed="false">Pause</button>
+      <button class="tg" id="tg-rep">Rapport</button>
+    </div>
+  </footer>
 
-            <div class="grid-2">
-                <div class="card">
-                    <h3>IDS <span style="font-size:0.7em; color:var(--text-secondary)">(Detection)</span></h3>
-                    <span class="tag tag-blue">Passif</span>
-                    <p>Écoute le réseau, analyse et lève une alerte. Ne modifie pas le trafic.</p>
-                </div>
-                <div class="card">
-                    <h3>IPS <span style="font-size:0.7em; color:var(--text-secondary)">(Prevention)</span></h3>
-                    <span class="tag tag-red">Actif</span>
-                    <p>Analyse et peut <strong>bloquer</strong> les paquets malveillants.</p>
-                    <hr style="border-color:#333; margin:10px 0">
-                    <p><small><strong>HIPS :</strong> IPS au niveau de l'hôte (Endpoint) ou sur éléments réseaux (FW/WAF).</small></p>
-                </div>
-            </div>
-            
-            <div class="alert-box">
-                <i class="fa-solid fa-triangle-exclamation"></i> <strong>Point Négatif Majeur : Les Faux Négatifs</strong><br>
-                Risque de non-détection d'une menace réelle.
-                <br><em>Solution :</em> Mettre à jour très régulièrement la base de données de signatures.
-            </div>
-        </section>
+</div>
 
-        <section id="definitions">
-            <h2><i class="fa-solid fa-book"></i> Définitions & Concepts</h2>
-            
-            <div class="grid-2">
-                <div class="card" style="background: linear-gradient(145deg, #1e293b, #243045);">
-                    <h3 style="color: var(--accent-yellow);">MDR</h3>
-                    <p><strong>Managed Detection and Response</strong></p>
-                    <p>C'est un EDR géré par une entreprise externe. Externalisation de la surveillance et de la réponse.</p>
-                </div>
+<script>
+(() => {
+'use strict';
 
-                <div class="card">
-                    <h3 style="color: var(--accent-purple);">Évolution SIEM</h3>
-                    <ul style="margin-top:10px;">
-                        <li style="margin-bottom: 10px;">
-                            <strong style="color: var(--text-primary);">SIM :</strong> Security Information Management.<br>
-                            <small>Gestion, stockage et conformité (Long terme).</small>
-                        </li>
-                        <li style="margin-bottom: 10px;">
-                            <strong style="color: var(--text-primary);">SEM :</strong> Security Event Management.<br>
-                            <small>Gestion des événements en temps réel (Monitoring).</small>
-                        </li>
-                        <li>
-                            <strong style="color: var(--accent-purple);">SIEM :</strong> Fusion des deux (SIM + SEM).
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </section>
+/* ============================================================
+   0. OUTILS
+   ============================================================ */
+const $  = s => document.querySelector(s);
+const rnd = (a,b) => a + Math.random()*(b-a);
+const ri  = (a,b) => Math.floor(rnd(a,b+1));
+const pick = a => a[Math.floor(Math.random()*a.length)];
+const clamp = (v,a,b) => v<a?a:v>b?b:v;
+const pad2 = n => String(n).padStart(2,'0');
+const TAU = Math.PI*2, D2R = Math.PI/180;
+const COL = {teal:'#2fd6c4',azure:'#4f9dff',amber:'#ffb020',coral:'#ff5468',mint:'#49e08b',violet:'#9d7bff',dim:'#7e9aa9',faint:'#4d6675'};
 
-    </main>
+/* ============================================================
+   1. LE SYSTÈME D'INFORMATION SIMULÉ
+   ============================================================ */
+const SEGS = [
+  {id:'dmz', nom:'DMZ / Périmètre',      col:COL.amber},
+  {id:'srv', nom:'Cœur serveurs',        col:COL.teal},
+  {id:'lan', nom:'Postes utilisateurs',  col:COL.azure},
+  {id:'ot',  nom:'Industriel / OT',      col:COL.violet}
+];
 
-    <footer>
-        <p>&copy; 2025 - CyberSec Notes - Synthèse de cours - Titouan GIBERT</p>
-    </footer>
+// crit : 1 = accessoire, 3 = joyau de la couronne
+const HOSTDEF = [
+  ['FW-EDGE-01',  'dmz','Pare-feu périmétrique',       '10.0.0.1',   3],
+  ['RP-WEB-01',   'dmz','Reverse proxy public',        '10.0.0.14',  2],
+  ['SRV-MAIL-01', 'dmz','Relais de messagerie',        '10.0.0.25',  2],
+  ['API-GTW-01',  'dmz','Passerelle API partenaires',  '10.0.0.31',  2],
+  ['SRV-AD-01',   'srv','Contrôleur de domaine',       '10.10.1.10', 3],
+  ['SRV-SQL-01',  'srv','Base de données métier',      '10.10.1.22', 3],
+  ['SRV-FILE-01', 'srv','Serveur de fichiers',         '10.10.1.30', 2],
+  ['SRV-BACK-01', 'srv','Sauvegardes',                 '10.10.1.44', 3],
+  ['SRV-HYPV-01', 'srv','Hyperviseur',                 '10.10.1.5',  3],
+  ['WKS-COMPTA-04','lan','Poste comptabilité',         '10.20.4.104',1],
+  ['WKS-DIR-01',  'lan','Poste direction',             '10.20.4.11', 2],
+  ['WKS-RH-02',   'lan','Poste ressources humaines',   '10.20.4.62', 2],
+  ['WKS-DSN-03',  'lan','Poste administration SI',     '10.20.4.33', 2],
+  ['NAS-ARCH-01', 'lan','Archives documentaires',      '10.20.9.7',  1],
+  ['SCADA-01',    'ot', 'Supervision technique',       '10.30.0.10', 2],
+  ['AUTOM-02',    'ot', 'Automate site',               '10.30.0.42', 1]
+];
 
+const LINKDEF = [
+  ['FW-EDGE-01','RP-WEB-01'],['FW-EDGE-01','SRV-MAIL-01'],['FW-EDGE-01','API-GTW-01'],
+  ['RP-WEB-01','SRV-SQL-01'],['API-GTW-01','SRV-SQL-01'],['SRV-MAIL-01','SRV-AD-01'],
+  ['FW-EDGE-01','SRV-HYPV-01'],['SRV-HYPV-01','SRV-AD-01'],['SRV-HYPV-01','SRV-SQL-01'],
+  ['SRV-HYPV-01','SRV-FILE-01'],['SRV-AD-01','SRV-FILE-01'],['SRV-AD-01','SRV-BACK-01'],
+  ['SRV-FILE-01','SRV-BACK-01'],['SRV-AD-01','WKS-COMPTA-04'],['SRV-AD-01','WKS-DIR-01'],
+  ['SRV-AD-01','WKS-RH-02'],['SRV-AD-01','WKS-DSN-03'],['WKS-DSN-03','NAS-ARCH-01'],
+  ['WKS-COMPTA-04','NAS-ARCH-01'],['SRV-HYPV-01','SCADA-01'],['SCADA-01','AUTOM-02'],
+  ['WKS-DSN-03','FW-EDGE-01'],['WKS-DIR-01','SRV-FILE-01']
+];
+
+// Origines : coordonnées réelles. Le site défendu est en Vendée.
+const HQ = {nom:'La Roche-sur-Yon', lat:46.670, lon:-1.427};
+const VILLES = [
+  ['Moscou',55.75,37.61],['Saint-Pétersbourg',59.93,30.34],['Pékin',39.90,116.40],
+  ['Shanghai',31.23,121.47],['Hong Kong',22.32,114.17],['Séoul',37.57,126.98],
+  ['Téhéran',35.69,51.39],['Istanbul',41.01,28.98],['Kiev',50.45,30.52],
+  ['Bucarest',44.43,26.10],['Amsterdam',52.37,4.90],['Sofia',42.70,23.32],
+  ['Lagos',6.52,3.38],['Le Caire',30.04,31.24],['Johannesbourg',-26.20,28.05],
+  ['Bombay',19.08,72.88],['Singapour',1.35,103.82],['Jakarta',-6.21,106.85],
+  ['São Paulo',-23.55,-46.63],['Buenos Aires',-34.60,-58.38],['Panama',8.98,-79.52],
+  ['Los Angeles',34.05,-118.24],['New York',40.71,-74.01],['Sydney',-33.87,151.21],
+  ['Vladivostok',43.12,131.89],['Minsk',53.90,27.57]
+];
+
+const ACTEURS = [
+  'LYNX CENDRÉ','VIPÈRE BLEUE','CORBEAU NOIR','OURS BORÉAL','SCORPION D\'AMBRE',
+  'FAUCON ROUGE','MÉDUSE PÂLE','CHACAL GRIS','COBRA D\'ÉTAIN','HYDRE SILENCIEUSE',
+  'MANTE VERTE','LOUP D\'HIVER'
+];
+
+// Chaîne d'attaque — étapes réelles, identifiants ATT&CK réels
+const CHAINE = [
+  {k:'recon',   n:'Reconnaissance',            mitre:'T1595', dur:7,  sev:'info'},
+  {k:'initial', n:'Accès initial',             mitre:'T1190', dur:10, sev:'warn'},
+  {k:'exec',    n:'Exécution de code',         mitre:'T1059', dur:9,  sev:'warn'},
+  {k:'persist', n:'Persistance',               mitre:'T1053', dur:11, sev:'warn'},
+  {k:'privesc', n:'Élévation de privilèges',   mitre:'T1068', dur:12, sev:'crit'},
+  {k:'lateral', n:'Mouvement latéral',         mitre:'T1021', dur:13, sev:'crit'},
+  {k:'exfil',   n:'Exfiltration',              mitre:'T1041', dur:16, sev:'crit'}
+];
+
+const DETAILS = {
+  recon:   ['balayage TCP 1-65535','énumération DNS du domaine','collecte OSINT sur les comptes','empreinte TLS du reverse proxy'],
+  initial: ['exploitation d\'un service exposé','pièce jointe piégée ouverte','identifiants valides rejoués','téléversement d\'un webshell'],
+  exec:    ['interpréteur PowerShell encodé en base64','tâche wmic distante','script de chargement en mémoire','binaire signé détourné'],
+  persist: ['tâche planifiée créée','service Windows enregistré','clé Run modifiée','compte local ajouté au groupe admins'],
+  privesc: ['vidage mémoire du processus d\'authentification','abus de jeton d\'accès','demande de ticket de service anormale','privilège de débogage acquis'],
+  lateral: ['session distante ouverte via SMB','exécution à distance de type PsExec','bureau à distance depuis un compte de service','montage de partage administratif'],
+  exfil:   ['archive chiffrée poussée vers un stockage externe','canal de commande sur DNS','synchronisation sortante vers un espace cloud','tunnel HTTPS vers infrastructure de contrôle']
+};
+
+/* ============================================================
+   2. ÉTAT
+   ============================================================ */
+const S = {
+  t:0, started:Date.now(), pause:false, auto:false, sound:true,
+  hosts:new Map(), links:[], threats:[], bloques:[], nextId:1,
+  integrite:100, dispo:100, neutralisees:0, fuites:0,
+  vague:1, vagueT:0, spawnT:4,
+  sel:null, hover:null, logs:0, hist:[], histI:0,
+  traf:new Array(150).fill(0).map(()=>rnd(18,30)),
+  mal:new Array(150).fill(0),
+  marquants:[]
+};
+
+HOSTDEF.forEach(([id,seg,role,ip,crit])=>{
+  S.hosts.set(id,{id,seg,role,ip,crit,etat:'ok',x:0,y:0,vx:0,vy:0,charge:rnd(8,26),voisins:[],remede:0,isoleT:0,pulse:0});
+});
+LINKDEF.forEach(([a,b])=>{
+  if(!S.hosts.has(a)||!S.hosts.has(b))return;
+  S.links.push({a,b,flux:0});
+  S.hosts.get(a).voisins.push(b);
+  S.hosts.get(b).voisins.push(a);
+});
+
+const ipAlea = () => `${ri(23,213)}.${ri(2,254)}.${ri(2,254)}.${ri(2,254)}`;
+
+/* ============================================================
+   3. AUDIO — synthèse pure, aucun fichier
+   ============================================================ */
+let AC=null;
+function ac(){ if(!AC){ try{ AC = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ AC=false; } } return AC; }
+function bip(f=660, d=.07, type='sine', g=.05){
+  if(!S.sound) return; const c = ac(); if(!c) return;
+  const o=c.createOscillator(), gn=c.createGain();
+  o.type=type; o.frequency.setValueAtTime(f,c.currentTime);
+  gn.gain.setValueAtTime(0,c.currentTime);
+  gn.gain.linearRampToValueAtTime(g,c.currentTime+.008);
+  gn.gain.exponentialRampToValueAtTime(.0001,c.currentTime+d);
+  o.connect(gn); gn.connect(c.destination); o.start(); o.stop(c.currentTime+d+.02);
+}
+const sonAlerte = () => { bip(880,.06,'triangle',.035); setTimeout(()=>bip(1180,.07,'triangle',.03),80); };
+const sonCrit   = () => { bip(220,.18,'sawtooth',.045); setTimeout(()=>bip(165,.26,'sawtooth',.05),140); };
+const sonAction = () => bip(520,.05,'square',.028);
+const sonOk     = () => { bip(680,.05,'sine',.03); setTimeout(()=>bip(1020,.09,'sine',.028),60); };
+
+/* ============================================================
+   4. JOURNAL
+   ============================================================ */
+const logEl = $('#logs');
+function hms(d=new Date()){ return pad2(d.getHours())+':'+pad2(d.getMinutes())+':'+pad2(d.getSeconds()); }
+function log(sev, msg, marquant=false){
+  const e = document.createElement('div');
+  e.className = 'le '+sev;
+  const tag = {info:'INFO',ok:'OK',warn:'ALRT',crit:'CRIT'}[sev]||'INFO';
+  e.innerHTML = `<span class="ts">${hms()}</span><span class="sv">${tag}</span><span class="ms">${msg}</span>`;
+  logEl.prepend(e);
+  while(logEl.children.length>220) logEl.lastChild.remove();
+  S.logs++; $('#log-count').textContent = S.logs+' évts';
+  if(marquant) S.marquants.push(`${hms()} [${tag}] ${msg.replace(/<[^>]+>/g,'')}`);
+}
+
+/* ============================================================
+   5. MOTEUR DE SIMULATION
+   ============================================================ */
+function pointEntree(){
+  const exposes = ['RP-WEB-01','SRV-MAIL-01','API-GTW-01','FW-EDGE-01','WKS-COMPTA-04','WKS-RH-02','WKS-DIR-01'];
+  const dispo = exposes.filter(h=>S.hosts.get(h).etat!=='isole');
+  return dispo.length ? pick(dispo) : pick(exposes);
+}
+
+function naitreMenace(){
+  const [nom,lat,lon] = pick(VILLES);
+  const t = {
+    id:S.nextId++, acteur:pick(ACTEURS), ville:nom, lat, lon,
+    ip:ipAlea(), hote:pointEntree(), etape:0, p:0, sauts:0,
+    chemin:[], retraite:0, morte:false, arc:Math.random(), naiss:S.t
+  };
+  t.chemin.push(t.hote);
+  S.threats.push(t);
+  log('info', `Flux entrant inhabituel depuis <b>${t.ip}</b> (${nom}) vers <b>${t.hote}</b>`);
+}
+
+function vitesse(){ return 1 + (S.vague-1)*0.14; }
+
+function avancerMenace(t, dt){
+  const h = S.hosts.get(t.hote);
+  const bloque = S.bloques.includes(t.ip);
+
+  if(bloque || h.etat==='isole' || h.etat==='remede'){
+    t.retraite += dt;
+    if(t.retraite > 2.2){
+      t.morte = true; S.neutralisees++;
+      log('ok', `Menace <b>${t.acteur}</b> (${t.ip}) neutralisée — progression stoppée sur ${t.hote}`, true);
+      sonOk();
+    }
+    return;
+  }
+  t.retraite = 0;
+
+  const et = CHAINE[t.etape];
+  t.p += dt * vitesse() / et.dur;
+
+  // marquage de l'hôte selon l'avancement
+  if(h.etat==='ok') h.etat = t.etape>=3 ? 'compromis' : 'suspect';
+  else if(h.etat==='suspect' && t.etape>=3) h.etat='compromis';
+  h.charge = clamp(h.charge + dt*rnd(2,9), 8, 99);
+  h.pulse = 1;
+
+  if(t.p < 1) return;
+  t.p = 0;
+
+  // --- étape franchie ---
+  const det = pick(DETAILS[et.k]);
+  log(et.sev, `<b>${t.acteur}</b> · ${et.n} sur <b>${t.hote}</b> — ${det} <span style="color:var(--faint)">[${et.mitre}]</span>`, et.sev==='crit');
+  if(et.sev==='crit') sonCrit(); else if(et.sev==='warn') sonAlerte();
+
+  if(S.auto && t.etape>=4 && h.etat!=='isole'){
+    isoler(t.hote, true);
+  }
+
+  if(et.k==='lateral'){
+    h.etat = 'compromis';
+    const cand = h.voisins.filter(v=>{
+      const vh=S.hosts.get(v);
+      return vh.etat!=='isole' && vh.etat!=='remede' && !t.chemin.includes(v);
+    });
+    if(cand.length && t.sauts < 3){
+      // priorité aux cibles de forte valeur
+      cand.sort((a,b)=>S.hosts.get(b).crit - S.hosts.get(a).crit);
+      const cible = Math.random()<.65 ? cand[0] : pick(cand);
+      const lk = S.links.find(l=>(l.a===t.hote&&l.b===cible)||(l.b===t.hote&&l.a===cible));
+      if(lk) lk.flux = 1;
+      t.hote = cible; t.chemin.push(cible); t.sauts++;
+      t.etape = 2; // reprise à l'exécution sur la nouvelle machine
+      log('crit', `Rebond de <b>${t.acteur}</b> vers <b>${cible}</b> — ${S.hosts.get(cible).role}`, true);
+      return;
+    }
+    t.etape = 6; return;
+  }
+
+  if(et.k==='exfil'){
+    const perte = 4 + h.crit*4 + ri(0,4);
+    S.integrite = clamp(S.integrite - perte, 0, 100);
+    S.fuites++;
+    h.etat = 'compromis';
+    log('crit', `⚠ EXFILTRATION CONFIRMÉE — <b>${t.hote}</b> (${h.role}). Intégrité −${perte} pts. Origine ${t.ip} / ${t.ville}`, true);
+    sonCrit(); flash();
+    t.morte = true;
+    return;
+  }
+
+  t.etape = Math.min(t.etape+1, CHAINE.length-1);
+}
+
+function tick(dt){
+  S.t += dt;
+
+  // vagues
+  S.vagueT += dt;
+  const dureeVague = 75;
+  if(S.vagueT > dureeVague){
+    S.vagueT = 0; S.vague++;
+    log('warn', `Montée en pression — <b>vague ${S.vague}</b>. Fréquence et vitesse des campagnes en hausse.`, true);
+    sonAlerte();
+  }
+
+  // apparitions
+  S.spawnT -= dt;
+  if(S.spawnT<=0 && S.threats.filter(t=>!t.morte).length < 7){
+    naitreMenace();
+    S.spawnT = Math.max(4.5, 15 - S.vague*1.5) * rnd(.65,1.4);
+  }
+
+  // menaces
+  S.threats.forEach(t=>{ if(!t.morte) avancerMenace(t,dt); });
+  S.threats = S.threats.filter(t=>!t.morte);
+
+  // hôtes
+  let indispo = 0;
+  S.hosts.forEach(h=>{
+    const occupe = S.threats.some(t=>!t.morte && t.hote===h.id);
+    if(h.etat==='isole') indispo += h.crit*2.2;
+    if(h.etat==='remede'){
+      indispo += h.crit*1.4;
+      h.remede -= dt;
+      if(h.remede<=0){
+        h.etat='ok'; h.charge=rnd(8,22);
+        log('ok', `Remédiation terminée sur <b>${h.id}</b> — hôte réintégré au domaine.`, true);
+        sonOk();
+      }
+    }
+    if(!occupe && (h.etat==='suspect')) h.etat='ok';
+    if(h.etat==='ok') h.charge += (rnd(10,30)-h.charge)*dt*.35;
+    h.pulse = Math.max(0, h.pulse - dt*1.6);
+  });
+  S.dispo = clamp(100 - indispo, 0, 100);
+
+  // liens
+  S.links.forEach(l=>{ l.flux = Math.max(0, l.flux - dt*.9); });
+
+  // séries temporelles
+  const actives = S.threats.filter(t=>!t.morte);
+  const base = 22 + Math.sin(S.t*.5)*6 + S.vague*2;
+  S.traf.push(clamp(base + rnd(-5,7) + actives.length*4, 0, 100));
+  S.mal.push(clamp(actives.reduce((a,t)=>a+t.etape*1.6,0) + rnd(0,3), 0, 100));
+  if(S.traf.length>150){S.traf.shift();S.mal.shift();}
+}
+
+/* ============================================================
+   6. ACTIONS ANALYSTE
+   ============================================================ */
+function isoler(id, auto=false){
+  const h = S.hosts.get(id); if(!h) return false;
+  if(h.etat==='isole') return false;
+  h.etat='isole'; h.isoleT=S.t;
+  log(auto?'warn':'ok', `${auto?'Confinement automatique':'Isolement manuel'} — <b>${id}</b> retiré du réseau.`, true);
+  sonAction(); majTout(); return true;
+}
+function reintegrer(id){
+  const h=S.hosts.get(id); if(!h) return false;
+  if(h.etat!=='isole') return false;
+  const occupe = S.threats.some(t=>!t.morte && t.hote===id);
+  h.etat = occupe ? 'compromis' : 'ok';
+  log(occupe?'warn':'ok', `<b>${id}</b> réintégré${occupe?' — attention, activité hostile toujours présente.':'.'}`);
+  sonAction(); majTout(); return true;
+}
+function remedier(id){
+  const h=S.hosts.get(id); if(!h) return false;
+  if(h.etat==='remede') return false;
+  S.threats.forEach(t=>{ if(!t.morte && t.hote===id){ t.morte=true; S.neutralisees++; } });
+  h.etat='remede'; h.remede = 6 + h.crit*2;
+  log('info', `Remédiation lancée sur <b>${id}</b> — réimage + rotation des secrets (${Math.round(h.remede)} s).`, true);
+  sonAction(); majTout(); return true;
+}
+function bloquer(ip){
+  if(S.bloques.includes(ip)) return false;
+  S.bloques.push(ip);
+  let n=0;
+  S.threats.forEach(t=>{ if(!t.morte && t.ip===ip) n++; });
+  log('ok', `Règle de blocage posée sur <b>${ip}</b> — ${n} session(s) en cours coupée(s).`, true);
+  sonAction(); majTout(); return true;
+}
+function flash(){ const f=$('#flash'); f.classList.add('on'); setTimeout(()=>f.classList.remove('on'),420); }
+
+/* ============================================================
+   7. RENDU — LISTE DES HÔTES
+   ============================================================ */
+const ETIQ = {ok:'nominal',suspect:'suspect',compromis:'compromis',isole:'isolé',remede:'remédiation'};
+const CLS  = {ok:'s-ok',suspect:'s-suspect',compromis:'s-compromis',isole:'s-isole',remede:'s-remede'};
+
+function rendreHotes(){
+  const c = $('#hostlist');
+  const ouvert = c.scrollTop;
+  c.innerHTML = '';
+  SEGS.forEach(sg=>{
+    const g = document.createElement('div'); g.className='seggroup';
+    g.innerHTML = `<div class="sh"><span class="lbl" style="color:${sg.col}">${sg.nom}</span><span class="ln"></span></div>`;
+    HOSTDEF.filter(h=>h[1]===sg.id).forEach(([id])=>{
+      const h = S.hosts.get(id);
+      const r = document.createElement('div');
+      r.className = 'hrow '+CLS[h.etat]+(S.sel===id?' sel':'');
+      r.tabIndex = 0;
+      r.innerHTML = `<span class="pip"></span><span class="nm">${id}</span><span class="st">${ETIQ[h.etat]}</span>`;
+      r.onclick = ()=>{ S.sel = S.sel===id?null:id; rendreHotes(); };
+      r.onkeydown = e=>{ if(e.key==='Enter'||e.key===' '){e.preventDefault();r.click();} };
+      g.appendChild(r);
+    });
+    c.appendChild(g);
+  });
+  c.scrollTop = ouvert;
+  const compro = [...S.hosts.values()].filter(h=>h.etat==='compromis').length;
+  const iso    = [...S.hosts.values()].filter(h=>h.etat==='isole').length;
+  $('#topo-count').textContent = `${S.hosts.size} hôtes · ${compro} compromis · ${iso} isolés`;
+}
+
+/* ============================================================
+   8. RENDU — INCIDENTS
+   ============================================================ */
+function rendreIncidents(){
+  const c = $('#incidents');
+  const act = S.threats.filter(t=>!t.morte && t.etape>=1)
+                       .sort((a,b)=> b.etape-a.etape || a.id-b.id);
+  $('#inc-count').textContent = act.length;
+  if(!act.length){
+    if(!c.querySelector('.empty')) c.innerHTML = '<div class="empty">Aucun incident ouvert. Le périmètre est calme.</div>';
+    return;
+  }
+  const vus = new Set(act.map(t=>'i'+t.id));
+  [...c.children].forEach(ch=>{ if(!vus.has(ch.id)) ch.remove(); });
+
+  act.forEach(t=>{
+    const et = CHAINE[t.etape];
+    const crit = t.etape>=4;
+    let el = document.getElementById('i'+t.id);
+    if(!el){
+      el = document.createElement('div'); el.id='i'+t.id;
+      el.innerHTML = `<div class="t1"><span class="actor"></span><span class="mit"></span></div>
+        <div class="t2"></div><div class="prog"><i></i></div>
+        <div class="btns">
+          <button data-a="iso">Isoler l'hôte</button>
+          <button data-a="blk">Bloquer l'IP</button>
+          <button data-a="rem">Remédier</button>
+        </div>`;
+      el.querySelector('[data-a="iso"]').onclick = ()=>isoler(t.hote);
+      el.querySelector('[data-a="blk"]').onclick = ()=>bloquer(t.ip);
+      el.querySelector('[data-a="rem"]').onclick = ()=>remedier(t.hote);
+      c.appendChild(el);
+    }
+    el.className = 'inc'+(crit?' crit':'');
+    el.querySelector('.actor').textContent = t.acteur;
+    el.querySelector('.mit').textContent = et.mitre;
+    el.querySelector('.t2').innerHTML =
+      `<b>${et.n}</b> · cible <b>${t.hote}</b><br><span style="color:var(--faint)">${t.ip} — ${t.ville}${t.sauts?` · ${t.sauts} rebond(s)`:''}</span>`;
+    el.querySelector('.prog i').style.width = Math.round(t.p*100)+'%';
+  });
+  const ordre = act.map(t=>'i'+t.id).join(',');
+  if(c.dataset.ordre !== ordre){
+    act.forEach(t=>{ const e=document.getElementById('i'+t.id); if(e) c.appendChild(e); });
+    c.dataset.ordre = ordre;
+  }
+  const vide = c.querySelector('.empty'); if(vide) vide.remove();
+}
+
+/* ============================================================
+   9. RENDU — FICHE HÔTE (dans le panneau topologie, en surcouche)
+   ============================================================ */
+function rendreDetail(){
+  let box = document.getElementById('detail');
+  const h = S.sel ? S.hosts.get(S.sel) : null;
+  if(!h){ if(box) box.remove(); return; }
+  if(!box){
+    box = document.createElement('div'); box.id='detail';
+    box.style.cssText = 'position:absolute;inset:0;background:linear-gradient(180deg,rgba(13,20,29,.97),rgba(10,16,23,.99));';
+    $('#topo').parentNode.appendChild(box);
+  }
+  const menaces = S.threats.filter(t=>!t.morte && t.hote===h.id);
+  const sig = h.id+'|'+h.etat+'|'+menaces.map(t=>t.id+':'+t.etape).join(',');
+  if(box.dataset.sig === sig){
+    const ch = box.querySelector('#charge'); if(ch) ch.textContent = Math.round(h.charge)+' %';
+    return;
+  }
+  box.dataset.sig = sig;
+  const procs = menaces.map(t=>{
+    const et = CHAINE[t.etape];
+    const liste = DETAILS[et.k];
+    return `<div class="proc"><b>PID ${1000+t.id*37%9000}</b><span>${liste[(t.id+t.etape)%liste.length]}</span></div>`;
+  }).join('') || '<div class="proc" style="color:var(--mint)">Aucun processus suspect en mémoire.</div>';
+
+  box.innerHTML = `
+    <div style="display:flex;align-items:center;gap:8px;padding:9px 12px;border-bottom:1px solid var(--rule-soft)">
+      <span class="tick" style="width:3px;height:11px;background:${SEGS.find(s=>s.id===h.seg).col};display:inline-block"></span>
+      <span style="font-size:12.5px;font-weight:700;letter-spacing:.1em">${h.id}</span>
+      <button class="tg" style="margin-left:auto" id="dclose">Fermer</button>
+    </div>
+    <div style="padding:10px 12px;overflow:auto;position:absolute;top:38px;left:0;right:0;bottom:0">
+      <div class="kv">
+        <span class="k">Rôle</span><span class="v">${h.role}</span>
+        <span class="k">Segment</span><span class="v">${SEGS.find(s=>s.id===h.seg).nom}</span>
+        <span class="k">Adresse</span><span class="v num">${h.ip}</span>
+        <span class="k">Criticité</span><span class="v">${'▮'.repeat(h.crit)}${'▯'.repeat(3-h.crit)} ${['','faible','élevée','vitale'][h.crit]}</span>
+        <span class="k">État</span><span class="v" style="color:${{ok:COL.mint,suspect:COL.amber,compromis:COL.coral,isole:COL.faint,remede:COL.azure}[h.etat]}">${ETIQ[h.etat].toUpperCase()}</span>
+        <span class="k">Charge</span><span class="v num" id="charge">${Math.round(h.charge)} %</span>
+        <span class="k">Voisins</span><span class="v" style="font-size:10.5px;color:var(--dim)">${h.voisins.join(' · ')}</span>
+      </div>
+      <div class="lbl" style="margin-bottom:5px">Activité en mémoire</div>
+      ${procs}
+      <div class="acts">
+        <button class="act warn" id="a-iso" ${h.etat==='isole'?'disabled':''}>Isoler</button>
+        <button class="act" id="a-rei" ${h.etat!=='isole'?'disabled':''}>Réintégrer</button>
+        <button class="act bad" id="a-rem" ${h.etat==='remede'?'disabled':''}>Remédier</button>
+      </div>
+    </div>`;
+  box.querySelector('#dclose').onclick = ()=>{ S.sel=null; rendreHotes(); majTout(); };
+  box.querySelector('#a-iso').onclick = ()=>isoler(h.id);
+  box.querySelector('#a-rei').onclick = ()=>reintegrer(h.id);
+  box.querySelector('#a-rem').onclick = ()=>remedier(h.id);
+}
+
+/* ============================================================
+   10. RENDU — BANDEAU
+   ============================================================ */
+function niveau(){
+  const act = S.threats.filter(t=>!t.morte);
+  const maxE = act.reduce((m,t)=>Math.max(m,t.etape),-1);
+  if(S.integrite<55 || maxE>=6) return [5,'NIVEAU ROUGE'];
+  if(maxE>=5) return [4,'NIVEAU ORANGE'];
+  if(maxE>=3) return [3,'NIVEAU JAUNE'];
+  if(act.length) return [2,'NIVEAU BLEU'];
+  return [1,'NIVEAU VERT'];
+}
+function coulJauge(v){ return v>75?COL.mint:v>45?COL.amber:COL.coral; }
+function majTout(){
+  const ci = coulJauge(S.integrite), cd = coulJauge(S.dispo);
+  $('#g-int').textContent = Math.round(S.integrite)+'%'; $('#g-int').style.color=ci;
+  $('#b-int').style.width = S.integrite+'%'; $('#b-int').style.background=ci;
+  $('#g-dis').textContent = Math.round(S.dispo)+'%'; $('#g-dis').style.color=cd;
+  $('#b-dis').style.width = S.dispo+'%'; $('#b-dis').style.background=cd;
+  $('#g-neu').textContent = S.neutralisees;
+  $('#g-fui').textContent = S.fuites;
+  $('#g-vag').textContent = S.vague;
+  $('#b-vag').style.width = Math.round(S.vagueT/75*100)+'%';
+  const [lv,txt] = niveau();
+  const tl = $('#tl'); tl.className = 'threatlvl l'+lv; $('#tl-txt').textContent = txt;
+  rendreHotes(); rendreIncidents(); rendreDetail();
+}
+
+/* ============================================================
+   11. GLOBE — projection perspective + orthodromies (slerp)
+   ============================================================ */
+const gc = $('#globe'), gx = gc.getContext('2d');
+let gW=0,gH=0,rot=-0.35,tilt=-0.42;
+
+function fit(cv,ctx){
+  const dpr = Math.min(2, window.devicePixelRatio||1);
+  const r = cv.getBoundingClientRect();
+  const w = Math.max(1,Math.round(r.width)), h = Math.max(1,Math.round(r.height));
+  if(cv.width!==w*dpr||cv.height!==h*dpr){ cv.width=w*dpr; cv.height=h*dpr; }
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  return [w,h];
+}
+const sph = (lat,lon)=>{
+  const la=lat*D2R, lo=lon*D2R;
+  return {x:Math.cos(la)*Math.sin(lo), y:-Math.sin(la), z:Math.cos(la)*Math.cos(lo)};
+};
+function rotate(p){
+  const c1=Math.cos(rot), s1=Math.sin(rot);
+  let x = p.x*c1 + p.z*s1, y = p.y, z = -p.x*s1 + p.z*c1;
+  const c2=Math.cos(tilt), s2=Math.sin(tilt);
+  const y2 = y*c2 - z*s2, z2 = y*s2 + z*c2;
+  return {x, y:y2, z:z2};
+}
+function slerp(a,b,t){
+  let d = clamp(a.x*b.x+a.y*b.y+a.z*b.z,-1,1);
+  const om = Math.acos(d);
+  if(om < 1e-6) return {...a};
+  const s = Math.sin(om), w1=Math.sin((1-t)*om)/s, w2=Math.sin(t*om)/s;
+  return {x:a.x*w1+b.x*w2, y:a.y*w1+b.y*w2, z:a.z*w1+b.z*w2};
+}
+function proj(p, R, cx, cy, alt=0){
+  const q = rotate(p);
+  const k = 1+alt;
+  const D = 3.1;
+  const f = D/(D + q.z*k);
+  return {x: cx + q.x*k*R*f, y: cy + q.y*k*R*f, z: q.z*k, f};
+}
+
+function dessinerGlobe(){
+  const [w,h] = fit(gc,gx);
+  gW=w; gH=h;
+  gx.clearRect(0,0,w,h);
+  const cx = w/2, cy = h/2, R = Math.min(w,h)*0.36;
+
+  // halo
+  const gl = gx.createRadialGradient(cx,cy,R*.6,cx,cy,R*1.7);
+  gl.addColorStop(0,'rgba(47,214,196,.10)');
+  gl.addColorStop(.55,'rgba(79,157,255,.05)');
+  gl.addColorStop(1,'rgba(0,0,0,0)');
+  gx.fillStyle = gl; gx.fillRect(0,0,w,h);
+
+  // disque
+  const dk = gx.createRadialGradient(cx-R*.3,cy-R*.35,R*.1,cx,cy,R);
+  dk.addColorStop(0,'rgba(22,42,54,.85)');
+  dk.addColorStop(1,'rgba(6,12,18,.92)');
+  gx.beginPath(); gx.arc(cx,cy,R,0,TAU); gx.fillStyle=dk; gx.fill();
+
+  // graticule : parallèles
+  gx.lineWidth = 1;
+  for(let lat=-80; lat<=80; lat+=20){
+    gx.beginPath(); let started=false;
+    for(let lon=-180; lon<=180; lon+=4){
+      const p = proj(sph(lat,lon),R,cx,cy);
+      if(p.z<0){ if(!started){gx.moveTo(p.x,p.y);started=true;} else gx.lineTo(p.x,p.y); }
+      else { started=false; }
+    }
+    gx.strokeStyle = lat===0 ? 'rgba(47,214,196,.30)' : 'rgba(120,178,200,.13)';
+    gx.stroke();
+  }
+  // méridiens
+  for(let lon=-180; lon<180; lon+=20){
+    gx.beginPath(); let started=false;
+    for(let lat=-90; lat<=90; lat+=4){
+      const p = proj(sph(lat,lon),R,cx,cy);
+      if(p.z<0){ if(!started){gx.moveTo(p.x,p.y);started=true;} else gx.lineTo(p.x,p.y); }
+      else started=false;
+    }
+    gx.strokeStyle='rgba(120,178,200,.11)'; gx.stroke();
+  }
+
+  // limbe
+  gx.beginPath(); gx.arc(cx,cy,R,0,TAU);
+  gx.strokeStyle='rgba(47,214,196,.35)'; gx.lineWidth=1.2; gx.stroke();
+
+  // réticule extérieur
+  gx.save();
+  gx.strokeStyle='rgba(120,178,200,.18)'; gx.lineWidth=1;
+  for(let i=0;i<72;i++){
+    const a = i/72*TAU, l = i%6===0 ? 9 : 4;
+    const r1 = R*1.14, r2 = r1+l;
+    gx.beginPath();
+    gx.moveTo(cx+Math.cos(a)*r1, cy+Math.sin(a)*r1);
+    gx.lineTo(cx+Math.cos(a)*r2, cy+Math.sin(a)*r2);
+    gx.stroke();
+  }
+  gx.restore();
+
+  const hqv = sph(HQ.lat,HQ.lon);
+  const hqp = proj(hqv,R,cx,cy);
+
+  // orthodromies
+  const act = S.threats.filter(t=>!t.morte);
+  act.forEach(t=>{
+    const a = sph(t.lat,t.lon);
+    const b = hqv;
+    const grave = t.etape>=5 ? COL.coral : t.etape>=3 ? COL.amber : COL.azure;
+    const N = 56;
+    const pts = [];
+    for(let i=0;i<=N;i++){
+      const u = i/N;
+      const m = slerp(a,b,u);
+      const alt = 0.30*Math.sin(u*Math.PI);
+      pts.push(proj(m,R,cx,cy,alt));
+    }
+    // trait
+    for(let i=0;i<N;i++){
+      const p1=pts[i],p2=pts[i+1];
+      const vis = (p1.z<0.25 && p2.z<0.25);
+      if(!vis) continue;
+      const al = clamp(.55 - Math.max(p1.z,0)*1.2, .05, .6) * (t.etape>=3?1:.7);
+      gx.beginPath(); gx.moveTo(p1.x,p1.y); gx.lineTo(p2.x,p2.y);
+      gx.strokeStyle = grave; gx.globalAlpha = al; gx.lineWidth=1.1; gx.stroke();
+    }
+    gx.globalAlpha=1;
+
+    // impulsion qui remonte l'arc
+    t.arc = (t.arc + 0.006 + t.etape*0.0012) % 1;
+    const ip = pts[Math.floor(t.arc*N)];
+    if(ip && ip.z<0.25){
+      gx.beginPath(); gx.arc(ip.x,ip.y,2.6,0,TAU);
+      gx.fillStyle=grave; gx.shadowColor=grave; gx.shadowBlur=12; gx.fill(); gx.shadowBlur=0;
+      // traînée
+      for(let k=1;k<8;k++){
+        const q = pts[Math.max(0,Math.floor(t.arc*N)-k)];
+        if(!q||q.z>=.25) continue;
+        gx.beginPath(); gx.arc(q.x,q.y,2.6-k*0.28,0,TAU);
+        gx.globalAlpha = .5 - k*.06; gx.fillStyle=grave; gx.fill();
+      }
+      gx.globalAlpha=1;
+    }
+
+    // source
+    const sp = proj(a,R,cx,cy);
+    if(sp.z<0.1){
+      gx.beginPath(); gx.arc(sp.x,sp.y,2.4,0,TAU); gx.fillStyle=grave; gx.fill();
+      const pr = (S.t*1.3 + t.id)%1;
+      gx.beginPath(); gx.arc(sp.x,sp.y,2.4+pr*13,0,TAU);
+      gx.globalAlpha = (1-pr)*.5; gx.strokeStyle=grave; gx.lineWidth=1; gx.stroke(); gx.globalAlpha=1;
+      gx.font='9px '+getComputedStyle(document.body).fontFamily;
+      gx.fillStyle='rgba(214,230,238,.72)';
+      gx.fillText(t.ville.toUpperCase(), sp.x+8, sp.y-4);
+      gx.fillStyle='rgba(125,154,169,.65)';
+      gx.fillText(t.ip, sp.x+8, sp.y+6);
+    }
+  });
+
+  // le site défendu
+  if(hqp.z<0.15){
+    const pr = (S.t*0.8)%1;
+    gx.beginPath(); gx.arc(hqp.x,hqp.y,3+pr*20,0,TAU);
+    gx.globalAlpha=(1-pr)*.55; gx.strokeStyle=COL.teal; gx.lineWidth=1.4; gx.stroke(); gx.globalAlpha=1;
+    gx.beginPath(); gx.arc(hqp.x,hqp.y,3.4,0,TAU);
+    gx.fillStyle=COL.teal; gx.shadowColor=COL.teal; gx.shadowBlur=16; gx.fill(); gx.shadowBlur=0;
+    gx.font='700 10px '+getComputedStyle(document.body).fontFamily;
+    gx.fillStyle=COL.teal;
+    gx.fillText('SITE PROTÉGÉ · '+HQ.nom.toUpperCase(), hqp.x+11, hqp.y+3);
+  }
+
+  $('#globe-info').textContent = `${act.length} flux actif(s) · ${S.bloques.length} IP bloquée(s)`;
+}
+
+/* ============================================================
+   12. TOPOLOGIE — placement par forces
+   ============================================================ */
+const tc = $('#topo'), tx = tc.getContext('2d');
+let tW=0,tH=0,init=false;
+
+function ancres(w,h){
+  return {dmz:{x:w*.5,y:h*.16}, srv:{x:w*.72,y:h*.52}, lan:{x:w*.26,y:h*.62}, ot:{x:w*.62,y:h*.88}};
+}
+function initPos(w,h){
+  const A = ancres(w,h);
+  S.hosts.forEach(hs=>{ const a=A[hs.seg]; hs.x=a.x+rnd(-30,30); hs.y=a.y+rnd(-30,30); });
+  init=true;
+}
+function forces(w,h,dt){
+  const A = ancres(w,h);
+  const arr = [...S.hosts.values()];
+  arr.forEach(n=>{
+    let fx=0, fy=0;
+    // répulsion
+    arr.forEach(m=>{
+      if(m===n) return;
+      let dx=n.x-m.x, dy=n.y-m.y;
+      let d2 = dx*dx+dy*dy;
+      if(d2<1){ dx=rnd(-1,1); dy=rnd(-1,1); d2=1; }
+      if(d2 > 26000) return;
+      const f = 1400/d2;
+      const d = Math.sqrt(d2);
+      fx += dx/d*f; fy += dy/d*f;
+    });
+    // gravité de segment
+    const a = A[n.seg];
+    fx += (a.x-n.x)*0.020; fy += (a.y-n.y)*0.020;
+    n.vx = (n.vx+fx)*0.80; n.vy = (n.vy+fy)*0.80;
+  });
+  // ressorts
+  S.links.forEach(l=>{
+    const p=S.hosts.get(l.a), q=S.hosts.get(l.b);
+    const dx=q.x-p.x, dy=q.y-p.y;
+    const d=Math.max(1,Math.hypot(dx,dy));
+    const f=(d-62)*0.012;
+    const ux=dx/d*f, uy=dy/d*f;
+    p.vx+=ux; p.vy+=uy; q.vx-=ux; q.vy-=uy;
+  });
+  const m=26;
+  S.hosts.forEach(n=>{
+    n.x = clamp(n.x+n.vx*dt*32, m, w-m);
+    n.y = clamp(n.y+n.vy*dt*32, m, h-m);
+  });
+}
+const COULE = {ok:COL.mint, suspect:COL.amber, compromis:COL.coral, isole:COL.faint, remede:COL.azure};
+
+function dessinerTopo(dt){
+  const [w,h] = fit(tc,tx);
+  if(!init){ tW=w; tH=h; initPos(w,h); }
+  else if(Math.abs(w-tW)>3 || Math.abs(h-tH)>3){
+    const sx = w/Math.max(1,tW), sy = h/Math.max(1,tH);
+    S.hosts.forEach(n=>{ n.x=clamp(n.x*sx,20,w-20); n.y=clamp(n.y*sy,20,h-20); });
+    tW=w; tH=h;
+  }
+  forces(w,h,dt);
+  tx.clearRect(0,0,w,h);
+
+  // étiquettes de segment
+  const A = ancres(w,h);
+  tx.font = '9px '+getComputedStyle(document.body).fontFamily;
+  SEGS.forEach(sg=>{
+    const a=A[sg.id];
+    tx.fillStyle = sg.col+'33';
+    tx.fillText(sg.nom.toUpperCase(), a.x-tx.measureText(sg.nom.toUpperCase()).width/2, a.y-46);
+  });
+
+  // liens
+  S.links.forEach(l=>{
+    const p=S.hosts.get(l.a), q=S.hosts.get(l.b);
+    const chaud = p.etat==='compromis'||q.etat==='compromis';
+    tx.beginPath(); tx.moveTo(p.x,p.y); tx.lineTo(q.x,q.y);
+    tx.strokeStyle = l.flux>0 ? COL.coral : chaud ? 'rgba(255,84,104,.22)' : 'rgba(120,178,200,.15)';
+    tx.lineWidth = l.flux>0 ? 1.8 : 1;
+    tx.globalAlpha = l.flux>0 ? .5+l.flux*.5 : 1;
+    tx.stroke(); tx.globalAlpha=1;
+    if(l.flux>0){
+      const t = 1-l.flux;
+      const px = p.x+(q.x-p.x)*t, py = p.y+(q.y-p.y)*t;
+      tx.beginPath(); tx.arc(px,py,3,0,TAU);
+      tx.fillStyle=COL.coral; tx.shadowColor=COL.coral; tx.shadowBlur=10; tx.fill(); tx.shadowBlur=0;
+    }
+  });
+
+  // nœuds
+  S.hosts.forEach(n=>{
+    const c = COULE[n.etat];
+    const sel = S.sel===n.id, hov = S.hover===n.id;
+    const r = 4 + n.crit*1.1 + (sel?2:0);
+    if(n.etat==='compromis' || n.pulse>0){
+      const pr = (S.t*1.1 + n.x*0.01)%1;
+      tx.beginPath(); tx.arc(n.x,n.y,r+pr*15,0,TAU);
+      tx.globalAlpha=(1-pr)*(n.etat==='compromis'?.45:.25); tx.strokeStyle=c; tx.lineWidth=1; tx.stroke(); tx.globalAlpha=1;
+    }
+    tx.beginPath(); tx.arc(n.x,n.y,r,0,TAU);
+    tx.fillStyle = n.etat==='isole' ? 'rgba(10,16,23,1)' : c;
+    tx.shadowColor=c; tx.shadowBlur = n.etat==='ok'?5:14; tx.fill(); tx.shadowBlur=0;
+    tx.lineWidth=1.2; tx.strokeStyle=c; tx.stroke();
+    if(sel||hov){
+      tx.beginPath(); tx.arc(n.x,n.y,r+5,0,TAU);
+      tx.strokeStyle='rgba(214,230,238,.7)'; tx.lineWidth=1; tx.stroke();
+    }
+    if(hov||sel||n.etat==='compromis'||n.crit===3){
+      tx.font=(sel?'700 ':'')+'9px '+getComputedStyle(document.body).fontFamily;
+      tx.fillStyle = sel||hov ? '#d6e6ee' : 'rgba(125,154,169,.85)';
+      const t = n.id;
+      tx.fillText(t, n.x - tx.measureText(t).width/2, n.y + r + 11);
+    }
+  });
+}
+
+tc.addEventListener('mousemove', e=>{
+  const r = tc.getBoundingClientRect();
+  const mx = e.clientX-r.left, my = e.clientY-r.top;
+  let best=null, bd=16*16;
+  S.hosts.forEach(n=>{ const d=(n.x-mx)**2+(n.y-my)**2; if(d<bd){bd=d;best=n.id;} });
+  S.hover = best;
+  tc.style.cursor = best?'pointer':'default';
+});
+tc.addEventListener('mouseleave', ()=>{ S.hover=null; });
+tc.addEventListener('click', ()=>{ if(S.hover){ S.sel = S.sel===S.hover?null:S.hover; majTout(); } });
+
+/* ============================================================
+   13. GRAPHE DE DÉBIT
+   ============================================================ */
+const cc = $('#chart'), cx2 = cc.getContext('2d');
+function dessinerChart(){
+  const [w,h] = fit(cc,cx2);
+  cx2.clearRect(0,0,w,h);
+  const pad = 6, W=w-pad*2, H=h-pad*2;
+
+  // grille
+  cx2.strokeStyle='rgba(120,178,200,.08)'; cx2.lineWidth=1;
+  for(let i=0;i<=4;i++){
+    const y = pad + H*i/4;
+    cx2.beginPath(); cx2.moveTo(pad,y); cx2.lineTo(w-pad,y); cx2.stroke();
+  }
+
+  const serie = (data, col, fill)=>{
+    const n = data.length;
+    cx2.beginPath();
+    data.forEach((v,i)=>{
+      const x = pad + W*i/(n-1), y = pad + H - (v/100)*H;
+      i?cx2.lineTo(x,y):cx2.moveTo(x,y);
+    });
+    if(fill){
+      cx2.lineTo(w-pad, h-pad); cx2.lineTo(pad, h-pad); cx2.closePath();
+      const g = cx2.createLinearGradient(0,pad,0,h-pad);
+      g.addColorStop(0, col+'44'); g.addColorStop(1, col+'00');
+      cx2.fillStyle=g; cx2.fill();
+      cx2.beginPath();
+      data.forEach((v,i)=>{
+        const x = pad + W*i/(n-1), y = pad + H - (v/100)*H;
+        i?cx2.lineTo(x,y):cx2.moveTo(x,y);
+      });
+    }
+    cx2.strokeStyle=col; cx2.lineWidth=1.3; cx2.stroke();
+  };
+  serie(S.traf, COL.teal, true);
+  serie(S.mal, COL.coral, true);
+
+  cx2.font='9px '+getComputedStyle(document.body).fontFamily;
+  cx2.fillStyle=COL.teal;  cx2.fillText('LÉGITIME', pad+2, pad+10);
+  cx2.fillStyle=COL.coral; cx2.fillText('SUSPECT',  pad+62, pad+10);
+  $('#chart-info').textContent = `${Math.round(S.traf[S.traf.length-1])} Mb/s · ${Math.round(S.mal[S.mal.length-1])} anomalies`;
+}
+
+/* ============================================================
+   14. CONSOLE
+   ============================================================ */
+const AIDE = [
+  ['aide','affiche cette liste'],
+  ['etat','synthèse chiffrée de la situation'],
+  ['hotes [segment]','liste les machines et leur état'],
+  ['menaces','détaille les campagnes en cours'],
+  ['isoler <hote>','retire une machine du réseau'],
+  ['reintegrer <hote>','remet une machine isolée en service'],
+  ['remedier <hote>','réimage la machine et fait tourner les secrets'],
+  ['bloquer <ip>','pose une règle de blocage sur le pare-feu'],
+  ['blocages','liste les IP bloquées'],
+  ['auto','bascule le confinement automatique'],
+  ['son','coupe ou rétablit les alertes sonores'],
+  ['pause','suspend ou relance la simulation'],
+  ['rapport','télécharge le rapport d\'incident'],
+  ['effacer','vide le journal']
+];
+function normaliser(s){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(); }
+function trouverHote(q){
+  const n = normaliser(q);
+  for(const id of S.hosts.keys()){ if(normaliser(id)===n) return id; }
+  for(const id of S.hosts.keys()){ if(normaliser(id).includes(n)) return id; }
+  return null;
+}
+function executer(raw){
+  const line = raw.trim(); if(!line) return;
+  log('info', `<span style="color:var(--teal)">analyste@sentinelle:~$</span> ${line.replace(/</g,'&lt;')}`);
+  const [c0,...args] = line.split(/\s+/);
+  const c = normaliser(c0), arg = args.join(' ');
+
+  switch(c){
+    case 'aide': case 'help': case '?':
+      AIDE.forEach(([k,v])=>log('info',`&nbsp;&nbsp;<b>${k}</b> <span style="color:var(--faint)">—</span> ${v}`));
+      break;
+    case 'etat': case 'status': {
+      const a = S.threats.filter(t=>!t.morte);
+      log('info', `Intégrité <b>${Math.round(S.integrite)}%</b> · disponibilité <b>${Math.round(S.dispo)}%</b> · vague <b>${S.vague}</b>`);
+      log('info', `Menaces actives <b>${a.length}</b> · neutralisées <b>${S.neutralisees}</b> · fuites <b>${S.fuites}</b> · IP bloquées <b>${S.bloques.length}</b>`);
+      break;
+    }
+    case 'hotes': case 'hosts': {
+      const f = arg ? normaliser(arg) : null;
+      let n=0;
+      S.hosts.forEach(h=>{
+        if(f && normaliser(h.seg)!==f && !normaliser(h.id).includes(f)) return;
+        n++;
+        log('info', `&nbsp;&nbsp;<b>${h.id.padEnd(15,' ').replace(/ /g,'&nbsp;')}</b> ${h.ip} <span style="color:${COULE[h.etat]}">${ETIQ[h.etat]}</span> — ${h.role}`);
+      });
+      if(!n) log('warn','Aucun hôte ne correspond.');
+      break;
+    }
+    case 'menaces': case 'threats': {
+      const a = S.threats.filter(t=>!t.morte);
+      if(!a.length){ log('ok','Aucune campagne active.'); break; }
+      a.forEach(t=>log('warn', `&nbsp;&nbsp;<b>${t.acteur}</b> · ${CHAINE[t.etape].n} (${CHAINE[t.etape].mitre}) · cible <b>${t.hote}</b> · ${t.ip} (${t.ville})`));
+      break;
+    }
+    case 'isoler': case 'isolate': {
+      const id = trouverHote(arg);
+      if(!id){ log('warn', arg?`Hôte inconnu : ${arg}. Tapez « hotes » pour la liste.`:'Précisez la machine : isoler SRV-AD-01'); break; }
+      if(!isoler(id)) log('warn', `${id} est déjà isolé.`);
+      break;
+    }
+    case 'reintegrer': case 'restore': {
+      const id = trouverHote(arg);
+      if(!id){ log('warn','Précisez la machine à réintégrer.'); break; }
+      if(!reintegrer(id)) log('warn', `${id} n'est pas isolé.`);
+      break;
+    }
+    case 'remedier': case 'remediate': {
+      const id = trouverHote(arg);
+      if(!id){ log('warn','Précisez la machine à remédier.'); break; }
+      remedier(id);
+      break;
+    }
+    case 'bloquer': case 'block': {
+      if(!/^\d+\.\d+\.\d+\.\d+$/.test(arg)){ log('warn','Format attendu : bloquer 203.0.113.7'); break; }
+      if(!bloquer(arg)) log('warn', `${arg} figure déjà dans les blocages.`);
+      break;
+    }
+    case 'blocages': case 'blocked':
+      if(!S.bloques.length) log('info','Aucune règle de blocage active.');
+      else S.bloques.forEach(ip=>log('info',`&nbsp;&nbsp;<b>${ip}</b> — refusée au périmètre`));
+      break;
+    case 'auto': basculer('auto'); break;
+    case 'son': case 'sound': basculer('snd'); break;
+    case 'pause': basculer('pause'); break;
+    case 'rapport': case 'report': rapport(); break;
+    case 'effacer': case 'clear': logEl.innerHTML=''; S.logs=0; $('#log-count').textContent='0 évts'; break;
+    default:
+      log('warn', `Commande inconnue : « ${c0.replace(/</g,'&lt;')} ». Tapez <b>aide</b>.`);
+  }
+}
+
+const cmd = $('#cmd');
+cmd.addEventListener('keydown', e=>{
+  if(e.key==='Enter'){
+    const v = cmd.value; if(v.trim()){ S.hist.push(v); S.histI=S.hist.length; }
+    executer(v); cmd.value='';
+  } else if(e.key==='ArrowUp'){
+    e.preventDefault(); if(S.histI>0){ S.histI--; cmd.value=S.hist[S.histI]||''; }
+  } else if(e.key==='ArrowDown'){
+    e.preventDefault(); if(S.histI<S.hist.length-1){ S.histI++; cmd.value=S.hist[S.histI]||''; } else { S.histI=S.hist.length; cmd.value=''; }
+  } else if(e.key==='Tab'){
+    e.preventDefault();
+    const parts = cmd.value.split(/\s+/);
+    if(parts.length<=1){
+      const m = AIDE.map(a=>a[0].split(' ')[0]).filter(k=>k.startsWith(normaliser(parts[0]||'')));
+      if(m.length===1) cmd.value = m[0]+' ';
+      else if(m.length>1) log('info','&nbsp;&nbsp;'+m.join('  ·  '));
+    } else {
+      const id = trouverHote(parts[parts.length-1]);
+      if(id){ parts[parts.length-1]=id; cmd.value=parts.join(' '); }
+    }
+  }
+});
+window.addEventListener('keydown', e=>{
+  if(e.key==='/' && document.activeElement!==cmd){ e.preventDefault(); cmd.focus(); }
+  if(e.key==='Escape'){ if(S.sel){S.sel=null;majTout();} cmd.blur(); }
+});
+
+/* ============================================================
+   15. BASCULES + RAPPORT
+   ============================================================ */
+function basculer(k){
+  if(k==='auto'){ S.auto=!S.auto; $('#tg-auto').setAttribute('aria-pressed',S.auto); log('info',`Confinement automatique <b>${S.auto?'activé':'désactivé'}</b>.`); }
+  if(k==='snd'){ S.sound=!S.sound; $('#tg-snd').setAttribute('aria-pressed',S.sound); log('info',`Alertes sonores <b>${S.sound?'actives':'coupées'}</b>.`); }
+  if(k==='pause'){ S.pause=!S.pause; $('#tg-pause').setAttribute('aria-pressed',S.pause); log('info',`Simulation <b>${S.pause?'suspendue':'relancée'}</b>.`); }
+  sonAction();
+}
+$('#tg-auto').onclick = ()=>basculer('auto');
+$('#tg-snd').onclick  = ()=>basculer('snd');
+$('#tg-pause').onclick= ()=>basculer('pause');
+$('#tg-rep').onclick  = ()=>rapport();
+
+function rapport(){
+  const dur = Math.floor((Date.now()-S.started)/1000);
+  const act = S.threats.filter(t=>!t.morte);
+  const L = [];
+  L.push('# Rapport d\'incident — SENTINELLE');
+  L.push('');
+  L.push(`Édité le ${new Date().toLocaleString('fr-FR')}`);
+  L.push(`Durée de la session : ${Math.floor(dur/60)} min ${pad2(dur%60)} s — vague atteinte : ${S.vague}`);
+  L.push('');
+  L.push('## Indicateurs');
+  L.push('');
+  L.push('| Indicateur | Valeur |');
+  L.push('|---|---|');
+  L.push(`| Intégrité des données | ${Math.round(S.integrite)} % |`);
+  L.push(`| Disponibilité du SI | ${Math.round(S.dispo)} % |`);
+  L.push(`| Menaces neutralisées | ${S.neutralisees} |`);
+  L.push(`| Exfiltrations confirmées | ${S.fuites} |`);
+  L.push(`| Campagnes encore ouvertes | ${act.length} |`);
+  L.push(`| Adresses bloquées | ${S.bloques.length} |`);
+  L.push('');
+  L.push('## État du parc');
+  L.push('');
+  L.push('| Hôte | Adresse | Segment | Criticité | État |');
+  L.push('|---|---|---|---|---|');
+  S.hosts.forEach(h=>L.push(`| ${h.id} | ${h.ip} | ${SEGS.find(s=>s.id===h.seg).nom} | ${['','faible','élevée','vitale'][h.crit]} | ${ETIQ[h.etat]} |`));
+  L.push('');
+  if(act.length){
+    L.push('## Campagnes ouvertes');
+    L.push('');
+    act.forEach(t=>L.push(`- **${t.acteur}** — ${CHAINE[t.etape].n} (${CHAINE[t.etape].mitre}) sur ${t.hote} · source ${t.ip} (${t.ville}) · chemin : ${t.chemin.join(' → ')}`));
+    L.push('');
+  }
+  if(S.bloques.length){
+    L.push('## Blocages périmétriques');
+    L.push('');
+    S.bloques.forEach(ip=>L.push(`- ${ip}`));
+    L.push('');
+  }
+  L.push('## Chronologie des faits marquants');
+  L.push('');
+  (S.marquants.length?S.marquants:['Aucun fait marquant enregistré.']).forEach(m=>L.push(`- ${m}`));
+  L.push('');
+  L.push('---');
+  L.push('_Document généré par SENTINELLE — environnement de simulation, données fictives._');
+
+  const blob = new Blob([L.join('\n')], {type:'text/markdown;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `rapport-incident-${new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')}.md`;
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+  log('ok','Rapport d\'incident exporté au format Markdown.');
+  sonOk();
+}
+
+/* ============================================================
+   16. BOUCLE
+   ============================================================ */
+let last = performance.now(), accUI = 0, accSim = 0;
+function boucle(now){
+  const dt = Math.min(.1, (now-last)/1000); last = now;
+  if(!S.pause){
+    accSim += dt;
+    while(accSim >= 1/20){ tick(1/20); accSim -= 1/20; }
+    rot += dt*0.055;
+  }
+  dessinerGlobe();
+  dessinerTopo(dt);
+  dessinerChart();
+  accUI += dt;
+  if(accUI > 0.35){ accUI = 0; majTout(); }
+  const d = new Date();
+  $('#clock').textContent = hms(d);
+  const s = Math.floor((Date.now()-S.started)/1000);
+  $('#uptime').textContent = `Session ${pad2(Math.floor(s/60))}:${pad2(s%60)}`;
+  requestAnimationFrame(boucle);
+}
+
+/* ============================================================
+   17. AMORÇAGE
+   ============================================================ */
+const LIGNES = [
+  'SENTINELLE v4.2 — noyau de corrélation',
+  'Chargement de la cartographie du parc <b>16 hôtes / 4 segments</b> ......... <span class="ok">OK</span>',
+  'Montage des sondes réseau (SPAN, NetFlow, journaux d\'authentification) .... <span class="ok">OK</span>',
+  'Base de règles ATT&CK <b>7 étapes de chaîne d\'attaque</b> .................. <span class="ok">OK</span>',
+  'Étalonnage de la projection orthodromique ................................. <span class="ok">OK</span>',
+  'Liaison au pare-feu périmétrique <b>FW-EDGE-01</b> .......................... <span class="ok">OK</span>',
+  'Poste analyste prêt. Vous prenez la main sur le périmètre.'
+];
+const bl = $('#bootlines');
+let li = 0;
+function amorcer(){
+  if(li >= LIGNES.length){ $('#boothint').style.visibility='visible'; return; }
+  const d = document.createElement('div');
+  d.innerHTML = LIGNES[li++];
+  d.style.opacity = 0;
+  bl.appendChild(d);
+  requestAnimationFrame(()=>{ d.style.transition='opacity .25s'; d.style.opacity=1; });
+  setTimeout(amorcer, li===1?420:230);
+}
+setTimeout(amorcer, 260);
+
+let lance = false;
+function demarrer(){
+  if(lance) return; lance = true;
+  ac();
+  $('#boot').classList.add('off');
+  const app = $('#app');
+  app.classList.add('on'); app.setAttribute('aria-hidden','false');
+  setTimeout(()=>$('#boot').remove(), 700);
+  log('ok','Prise de poste. Surveillance active sur les 4 segments.');
+  log('info','Astuce : cliquez un nœud de la topologie, ou tapez <b>aide</b> dans la console.');
+  majTout();
+  requestAnimationFrame(boucle);
+  setTimeout(()=>cmd.focus(), 800);
+  setTimeout(naitreMenace, 2200);
+}
+$('#boot').addEventListener('click', demarrer);
+$('#boot').addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); demarrer(); } });
+$('#boot').focus();
+
+
+
+})();
+</script>
 </body>
 </html>
